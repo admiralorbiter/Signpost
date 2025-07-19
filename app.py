@@ -1,11 +1,13 @@
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 import os
+import json
 from datetime import datetime
 from portal_config import (
     get_portals_list, get_projects_dict, add_new_portal, remove_portal, update_portal_status,
     discover_levels, get_level_metadata, create_level_with_metadata, auto_generate_portal_config
 )
+from data_processing import get_processed_data, data_processor
 
 app = Flask(__name__)
 CORS(app)
@@ -265,6 +267,147 @@ def create_level():
     
     except Exception as e:
         return jsonify({'error': f'Failed to create level: {str(e)}'}), 500
+
+# NEW: Data Processing Pipeline API Endpoints
+
+@app.route('/api/data/<source>')
+def get_data(source):
+    """Get processed data for visualization"""
+    format_type = request.args.get('format', '3d_scatter')
+    params = request.args.get('params', '{}')
+    
+    try:
+        # Parse params if provided as JSON string
+        if isinstance(params, str):
+            params = json.loads(params) if params else {}
+        
+        result = get_processed_data(source, format_type, params)
+        
+        if 'error' in result:
+            return jsonify(result), 400
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({'error': f'Failed to process data: {str(e)}'}), 500
+
+@app.route('/api/data/<source>/raw')
+def get_raw_data(source):
+    """Get raw data without processing"""
+    params = request.args.get('params', '{}')
+    
+    try:
+        # Parse params if provided as JSON string
+        if isinstance(params, str):
+            params = json.loads(params) if params else {}
+        
+        result = data_processor.fetch_data(source, params)
+        
+        if 'error' in result:
+            return jsonify(result), 400
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({'error': f'Failed to fetch data: {str(e)}'}), 500
+
+@app.route('/api/data/sources')
+def get_data_sources():
+    """Get list of available data sources"""
+    sources = {
+        'crime_data': {
+            'name': 'Kansas City Crime Data',
+            'description': 'Crime incidents and statistics for Kansas City metro area',
+            'formats': ['3d_scatter', 'heatmap', 'timeline'],
+            'params': {
+                'n_points': 'Number of data points to generate (default: 100)'
+            }
+        },
+        'funding_data': {
+            'name': 'Federal Funding Flow',
+            'description': 'Federal funding data across agencies and states',
+            'formats': ['3d_scatter', 'heatmap', 'timeline', 'network'],
+            'params': {
+                'n_agencies': 'Number of agencies to include (default: 20)'
+            }
+        },
+        'education_data': {
+            'name': 'Education Statistics',
+            'description': 'School data including enrollment, performance, and funding',
+            'formats': ['3d_scatter', 'heatmap'],
+            'params': {
+                'n_schools': 'Number of schools to include (default: 50)'
+            }
+        },
+        'democracy_data': {
+            'name': 'Democracy Metrics',
+            'description': 'Voting data, gerrymandering scores, and demographic information',
+            'formats': ['3d_scatter', 'heatmap', 'network'],
+            'params': {
+                'n_districts': 'Number of districts to include (default: 100)'
+            }
+        },
+        'kansas_city_crashes': {
+            'name': 'Kansas City Crash Data',
+            'description': 'Traffic accident records from Kansas City',
+            'formats': ['3d_scatter', 'heatmap', 'timeline'],
+            'params': {
+                'limit': 'Number of records to include (default: all)'
+            }
+        },
+        'kansas_city_intersections': {
+            'name': 'Kansas City Intersection Data',
+            'description': 'Geographic intersection information',
+            'formats': ['3d_scatter', 'heatmap'],
+            'params': {
+                'limit': 'Number of records to include (default: all)'
+            }
+        },
+        'kansas_city_gps': {
+            'name': 'Kansas City GPS Data',
+            'description': 'Location coordinates and mapping data',
+            'formats': ['3d_scatter', 'heatmap'],
+            'params': {
+                'limit': 'Number of records to include (default: all)'
+            }
+        }
+    }
+    
+    return jsonify({
+        'sources': sources,
+        'total_sources': len(sources)
+    })
+
+@app.route('/api/data/formats')
+def get_data_formats():
+    """Get list of available data formats"""
+    formats = {
+        '3d_scatter': {
+            'name': '3D Scatter Plot',
+            'description': 'Three-dimensional scatter plot visualization',
+            'best_for': ['Geographic data', 'Multi-dimensional relationships', 'Point clouds']
+        },
+        'heatmap': {
+            'name': 'Heatmap',
+            'description': 'Color-coded intensity map',
+            'best_for': ['Density visualization', 'Category comparisons', 'Statistical patterns']
+        },
+        'timeline': {
+            'name': 'Timeline',
+            'description': 'Time-based data visualization',
+            'best_for': ['Temporal data', 'Historical trends', 'Event sequences']
+        },
+        'network': {
+            'name': 'Network Graph',
+            'description': 'Connected node and edge visualization',
+            'best_for': ['Relationship mapping', 'Social networks', 'System connections']
+        }
+    }
+    
+    return jsonify({
+        'formats': formats,
+        'total_formats': len(formats)
+    })
 
 @app.route('/api/health')
 def health():

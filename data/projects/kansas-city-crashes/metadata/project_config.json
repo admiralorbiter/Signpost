@@ -1,0 +1,53 @@
+{
+  "project_name": "Kansas City Crash Data Analysis",
+  "description": "Interactive 3D visualization of traffic crash data in Kansas City",
+  "data_sources": {
+    "crashes": {
+      "description": "Traffic accident records",
+      "file_pattern": "crashes_*.csv",
+      "required_fields": ["date", "latitude", "longitude", "severity", "type"],
+      "optional_fields": ["weather", "time", "road_conditions", "vehicles_involved"]
+    },
+    "intersections": {
+      "description": "Geographic intersection information",
+      "file_pattern": "intersections_*.csv",
+      "required_fields": ["intersection_id", "latitude", "longitude", "street_names"],
+      "optional_fields": ["traffic_signals", "stop_signs", "speed_limit"]
+    },
+    "gps": {
+      "description": "Location coordinates and mapping data",
+      "file_pattern": "gps_*.csv",
+      "required_fields": ["point_id", "latitude", "longitude"],
+      "optional_fields": ["elevation", "accuracy", "timestamp"]
+    }
+  },
+  "visualization_configs": {
+    "3d_scatter": {
+      "description": "3D scatter plot of crash locations",
+      "x_field": "longitude",
+      "y_field": "latitude", 
+      "z_field": "severity",
+      "color_field": "type",
+      "size_field": "vehicles_involved"
+    },
+    "heatmap": {
+      "description": "Heat map of crash density",
+      "lat_field": "latitude",
+      "lng_field": "longitude",
+      "intensity_field": "severity"
+    },
+    "timeline": {
+      "description": "Timeline of crashes over time",
+      "time_field": "date",
+      "value_field": "severity",
+      "group_field": "type"
+    }
+  },
+  "processing_steps": [
+    "load_raw_data",
+    "clean_coordinates", 
+    "categorize_severity",
+    "geocode_locations",
+    "generate_visualization_data"
+  ]
+} 

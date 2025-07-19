@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Kansas City Crash Analysis</title>
+    <meta name="description" content="Interactive map visualization of Kansas City traffic crash data">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    
+    <style>
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background: white;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .control-btn {
+            display: block;
+            margin: 5px 0;
+            padding: 8px 12px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .control-btn:hover {
+            background: #0052a3;
+        }
+        
+        .stats-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+        }
+        
+        .stat-item {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stat-value {
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div id="map"></div>
+        
+        <div class="controls">
+            <button class="control-btn" onclick="toggleDataLayer('intersections')">Toggle Intersections</button>
+            <button class="control-btn" onclick="refreshData()">Refresh Data</button>
+            <button class="control-btn" onclick="exportData()">Export Data</button>
+            <button class="control-btn" onclick="window.location.href='/'">Back to Gateway</button>
+        </div>
+        
+        <div class="stats-panel">
+            <h3>Kansas City Crash Analysis</h3>
+            <div class="stat-item">
+                <span class="stat-label">Total Crashes:</span>
+                <span class="stat-value" id="total-crashes">Loading...</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">High Crash Intersections:</span>
+                <span class="stat-value" id="high-crash-intersections">Loading...</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Most Common Type:</span>
+                <span class="stat-value" id="common-type">Loading...</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Personal Injury Crashes:</span>
+                <span class="stat-value" id="injury-crashes">Loading...</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Data Source:</span>
+                <span class="stat-value">Kansas City PD</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let crashLayer;
+        let intersectionLayer;
+        let crashData = [];
+        let intersectionData = [];
+        
+        // Initialize the map
+        function initMap() {
+            // Kansas City coordinates
+            const kcLat = 39.0997;
+            const kcLng = -94.5786;
+            
+            map = L.map('map').setView([kcLat, kcLng], 11);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Initialize layers
+            crashLayer = L.layerGroup().addTo(map);
+            intersectionLayer = L.layerGroup().addTo(map);
+            
+            // Load data
+            loadCrashData();
+            loadIntersectionData();
+        }
+        
+        // Load crash data from API
+        function loadCrashData() {
+            fetch('/api/data/kansas_city_crashes/raw?limit=1000')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error loading crash data:', data.error);
+                        return;
+                    }
+                    
+                    crashData = data.data || [];
+                    console.log('Crash data loaded:', crashData.length, 'records');
+                    visualizeCrashes();
+                    updateStats();
+                })
+                .catch(error => {
+                    console.error('Error loading crash data:', error);
+                    crashData = [];
+                    updateStats();
+                });
+        }
+        
+        // Load intersection data from API
+        function loadIntersectionData() {
+            fetch('/api/data/kansas_city_intersections/raw?limit=1000')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error loading intersection data:', data.error);
+                        return;
+                    }
+                    
+                    intersectionData = data.data || [];
+                    console.log('Intersection data loaded:', intersectionData.length, 'records');
+                    visualizeIntersections();
+                    updateStats();
+                })
+                .catch(error => {
+                    console.error('Error loading intersection data:', error);
+                    intersectionData = [];
+                    updateStats();
+                });
+        }
+        
+        // Visualize crash data on map
+        function visualizeCrashes() {
+            crashLayer.clearLayers();
+            
+            // Since crash data doesn't have coordinates, we'll show a message
+            // and focus on intersection data which has coordinates
+            console.log('Crash data loaded:', crashData.length, 'records');
+            console.log('Note: Crash data contains street names but no coordinates');
+            
+            // Add a note to the map
+            const note = L.popup()
+                .setLatLng([39.0997, -94.5786])
+                .setContent(`
+                    <div style="min-width: 200px;">
+                        <h4>Crash Data Available</h4>
+                        <p><strong>Total Crashes:</strong> ${crashData.length}</p>
+                        <p><strong>Note:</strong> Crash data contains street names but no GPS coordinates.</p>
+                        <p>Use intersection data (colored circles) to see geographic crash patterns.</p>
+                    </div>
+                `);
+            
+            // Show the note briefly
+            note.openOn(map);
+            setTimeout(() => map.closePopup(), 5000);
+        }
+        
+        // Visualize intersection data on map
+        function visualizeIntersections() {
+            intersectionLayer.clearLayers();
+            
+            intersectionData.forEach(intersection => {
+                if (intersection.Latitude && intersection.Longitude) {
+                    const lat = parseFloat(intersection.Latitude);
+                    const lng = parseFloat(intersection.Longitude);
+                    const crashCount = parseInt(intersection.CrashCount) || 0;
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        // Size based on crash count
+                        const radius = Math.max(5, Math.min(20, crashCount / 10));
+                        
+                        // Color based on crash count
+                        let color = '#4ecdc4'; // Green for low
+                        if (crashCount > 200) {
+                            color = '#ff6b6b'; // Red for high
+                        } else if (crashCount > 100) {
+                            color = '#ff8e53'; // Orange for medium
+                        }
+                        
+                        const marker = L.circleMarker([lat, lng], {
+                            radius: radius,
+                            fillColor: color,
+                            color: '#333',
+                            weight: 2,
+                            opacity: 0.9,
+                            fillOpacity: 0.7
+                        }).addTo(intersectionLayer);
+                        
+                        // Popup with intersection details
+                        const popupContent = `
+                            <div style="min-width: 200px;">
+                                <h4>Intersection Analysis</h4>
+                                <p><strong>Location:</strong> ${intersection.Intersection}</p>
+                                <p><strong>Crash Count:</strong> ${crashCount}</p>
+                                <p><strong>Risk Level:</strong> ${getRiskLevel(crashCount)}</p>
+                                <p><strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
+                            </div>
+                        `;
+                        
+                        marker.bindPopup(popupContent);
+                    }
+                }
+            });
+        }
+        
+        // Get risk level based on crash count
+        function getRiskLevel(crashCount) {
+            if (crashCount > 200) return 'High Risk';
+            if (crashCount > 100) return 'Medium Risk';
+            if (crashCount > 50) return 'Low Risk';
+            return 'Very Low Risk';
+        }
+        
+        // Update statistics panel
+        function updateStats() {
+            // Total crashes
+            document.getElementById('total-crashes').textContent = crashData.length || 0;
+            
+            // High crash intersections (more than 100 crashes)
+            const highCrashIntersections = intersectionData.filter(int => 
+                int.CrashCount && parseInt(int.CrashCount) > 100
+            ).length;
+            document.getElementById('high-crash-intersections').textContent = highCrashIntersections;
+            
+            // Most common crash type
+            const typeCounts = {};
+            if (crashData && crashData.length > 0) {
+                crashData.forEach(crash => {
+                    if (crash && crash.Type) {
+                        const type = crash.Type || 'Unknown';
+                        typeCounts[type] = (typeCounts[type] || 0) + 1;
+                    }
+                });
+            }
+            
+            const typeKeys = Object.keys(typeCounts);
+            const mostCommonType = typeKeys.length > 0 ? 
+                typeKeys.reduce((a, b) => typeCounts[a] > typeCounts[b] ? a : b) : 
+                'No data';
+            document.getElementById('common-type').textContent = mostCommonType;
+            
+            // Personal injury crashes
+            const injuryCrashes = crashData.filter(crash => 
+                crash && crash.Severity && crash.Severity.includes('Personal Injury')
+            ).length;
+            document.getElementById('injury-crashes').textContent = injuryCrashes;
+        }
+        
+        // Toggle data layers
+        function toggleDataLayer(layerType) {
+            if (layerType === 'crashes') {
+                if (map.hasLayer(crashLayer)) {
+                    map.removeLayer(crashLayer);
+                } else {
+                    map.addLayer(crashLayer);
+                }
+            } else if (layerType === 'intersections') {
+                if (map.hasLayer(intersectionLayer)) {
+                    map.removeLayer(intersectionLayer);
+                } else {
+                    map.addLayer(intersectionLayer);
+                }
+            }
+        }
+        
+        // Refresh data
+        function refreshData() {
+            loadCrashData();
+            loadIntersectionData();
+        }
+        
+        // Export data
+        function exportData() {
+            const data = {
+                crashes: crashData,
+                intersections: intersectionData,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'kansas-city-crash-data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+    </script>
+</body>
+</html> 

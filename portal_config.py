@@ -66,24 +66,7 @@ PORTAL_CONFIG = {
         }
     },
     
-    # Analysis Portal
-    'analysis': {
-        'id': 'analysis',
-        'title': 'Data Visualization',
-        'description': 'Crime Analytics Urban Studies',
-        'category': 'analysis',
-        'position': {'x': -5, 'y': 1, 'z': -3},
-        'color': '#aa6600',
-        'status': 'development',
-        'project_data': {
-            'title': 'Data & Analysis Portal',
-            'description': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.',
-            'features': ['3D Data Viz', 'Crime Mapping', 'Urban Planning', 'Real-time Analytics'],
-            'status': 'coming-soon',
-            'eta': 'Q1 2025',
-            'progress': 5
-        }
-    },
+
     'attention-economy-exchange': {
         'id': 'attention-economy-exchange',
         'title': 'Attention Economy Exchange',
@@ -92,6 +75,7 @@ PORTAL_CONFIG = {
         'position': {'x': -8, 'y': 1, 'z': 8},  # Adjust position as needed for your gateway layout
         'color': '#ff3333',  # Red color to represent the danger/warning theme
         'status': 'ready',
+        'default_level': 'attention-economy-exchange',
         'project_data': {
             'title': 'The Attention Economy Stock Exchange - Interactive Moral Simulation',
             'description': 'Step into the role of a Junior Attention Broker in this immersive moral simulation. You will face real choices that tech companies make daily: deploy psychological manipulation for profit, or refuse and watch competitors succeed. Experience both sides of surveillance capitalism - as the manipulator AND the manipulated. Make trades that hook millions of users, witness the human cost of your decisions, and ultimately choose between whistleblowing heroism or corrupted villainy. This is not just education - it\'s an interactive moral laboratory that reveals the true mechanics of digital manipulation.',
@@ -137,6 +121,38 @@ PORTAL_CONFIG = {
                 'Understand how individual choices compound into societal harm'
             ],
             'real_world_impact': 'Prepares users to recognize and resist digital manipulation in their daily lives while understanding the systemic nature of attention capitalism'
+        }
+    },
+    'kansas-city-crash-analysis': {
+        'id': 'kansas-city-crash-analysis',
+        'title': 'Kansas City Crash Analysis',
+        'description': 'Interactive map visualization of traffic crash data',
+        'category': 'analysis',
+        'position': {'x': -2, 'y': 1, 'z': -5},
+        'color': '#aa6600',
+        'status': 'ready',
+        'default_level': 'kansas-city-crash-analysis',
+        'project_data': {
+            'title': 'Kansas City Crash Analysis - Interactive Map Visualization',
+            'description': 'Interactive map visualization of Kansas City traffic crash data using Leaflet.js. Features include crash location mapping, intersection analysis, severity visualization, and real-time data filtering.',
+            'features': [
+                'Interactive map with OpenStreetMap tiles',
+                'Crash location visualization with severity coding',
+                'Intersection analysis with risk assessment',
+                'Real-time data filtering and layer toggling',
+                'Statistical analysis and export capabilities',
+                'Detailed popup information for each data point'
+            ],
+            'status': 'ready',
+            'eta': 'Available Now',
+            'progress': 100,
+            'level_name': 'kansas-city-crash-analysis',
+            'category': 'analysis',
+            'data_sources': [
+                'Kansas City PD crash records',
+                'Intersection crash count analysis',
+                'Real-time data processing pipeline'
+            ]
         }
     },
 }
@@ -200,8 +216,9 @@ def get_portals_with_levels():
             if os.path.exists(category_path):
                 html_files = [f for f in os.listdir(category_path) if f.endswith('.html')]
                 if html_files:
-                    # Add the first level as the default
-                    portal_config['default_level'] = html_files[0].replace('.html', '')
+                    # Use the specific default_level if set, otherwise use the first file
+                    if 'default_level' not in portal_config:
+                        portal_config['default_level'] = html_files[0].replace('.html', '')
                     portal_config['available_levels'] = [f.replace('.html', '') for f in html_files]
                     available_portals.append(portal_config)
     

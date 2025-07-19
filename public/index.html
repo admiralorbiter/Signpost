@@ -168,8 +168,7 @@
             material="color: #001133; opacity: 0.7; transparent: true">
         </a-triangle>
 
-        <!-- Test cube to verify 3D rendering -->
-        <a-box position="0 1 0" color="red" width="1" height="1" depth="1"></a-box>
+
         
         <!-- Lighting -->
         <a-light type="ambient" intensity="0.3" color="#002244"></a-light>
@@ -296,9 +295,7 @@
                     fallbackMessage.style.display = 'none';
                     
                     // Debug: Check if elements are visible
-                    const testCube = document.querySelector('a-box[color="red"]');
                     const portals = document.querySelectorAll('.portal');
-                    console.log('Signpost Observatory: Test cube found:', !!testCube);
                     console.log('Signpost Observatory: Portals found:', portals.length);
                     
                     // Add a visible indicator if scene loads
@@ -335,41 +332,7 @@
             }
         });
         
-        async function loadPortalData() {
-            try {
-                const response = await fetch('/api/portals');
-                const portals = await response.json();
-                console.log('Loaded portal data:', portals);
-            } catch (error) {
-                console.error('Error loading portal data:', error);
-            }
-        }
-        
-        async function handlePortalClick(project) {
-            console.log(`Entering ${project} project`);
-            
-            try {
-                const response = await fetch(`/api/projects/${project}`);
-                const projectData = await response.json();
-                
-                showProjectModal(projectData);
-            } catch (error) {
-                console.error('Error loading project data:', error);
-                // Fallback to static descriptions
-                const descriptions = {
-                    'education': 'Future: Interactive AI tutoring systems, virtual classrooms with adaptive learning environments, and tools for addressing the education pipeline collapse.',
-                    'democracy': 'Future: Simulations of democratic processes, visualization of political data, and interactive explorations of the threats to democratic norms.',
-                    'connection': 'Future: VR experiences exploring human-AI empathy, virtual therapy environments, and philosophical spaces for contemplating consciousness.',
-                    'analysis': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.'
-                };
-                
-                showProjectModal({
-                    title: `${project.toUpperCase()} Portal`,
-                    description: descriptions[project] || 'Project details coming soon...',
-                    status: 'in-development'
-                });
-            }
-        }
+
         
         function showProjectModal(projectData) {
             const modal = document.createElement('div');
