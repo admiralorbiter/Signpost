@@ -47,9 +47,6 @@ vr-gateway/
 5. **Click portals** to enter different project spaces
 
 ## Core Philosophy
-
-This VR gateway reflects the analytical yet empathetic voice found in the source writing - creating spaces that are:
-
 - **Intellectually rigorous** but accessible
 - **Urgent and purposeful** without being overwhelming  
 - **Personal yet universal** in scope
