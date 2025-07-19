@@ -125,6 +125,7 @@
             <!-- 3D Models -->
             <!-- Placeholder for your building model - replace with actual path -->
             <a-asset-item id="observatory-building" src="/assets/models/buildings/observatory.glb"></a-asset-item>
+            <a-asset-item id="giant-cat" src="/assets/models/props/cat.glb"></a-asset-item>
             
             <!-- Sounds -->
             <audio id="ambient-sound" src="" preload="auto" loop></audio>
@@ -158,6 +159,17 @@
             height="0.2" 
             material="color: #003366; metalness: 0.3; roughness: 0.7">
         </a-cylinder>
+        
+        <!-- Giant Cat - Background atmospheric element -->
+        <a-entity 
+            id="giant-cat"
+            position="0 15 -50"
+            scale="15 15 15"
+            rotation="0 180 0"
+            gltf-model="#giant-cat"
+            shadow="cast: true; receive: true"
+            animation="property: rotation; to: 0 540 0; dur: 60000; loop: true">
+        </a-entity>
         
         <!-- Observatory Building - Replacing the central pillar -->
         <a-entity 
@@ -235,6 +247,10 @@
         <a-light type="directional" position="0 20 10" intensity="1.0" color="#ffffff"></a-light>
         <a-light type="point" position="0 10 0" intensity="1.5" color="#66aaff"></a-light>
         <a-light type="spot" position="0 15 5" intensity="2.0" color="#ffffff" angle="45" target="0 0 0"></a-light>
+        
+        <!-- Cat-specific lighting -->
+        <a-light type="point" position="0 15 -50" intensity="0.8" color="#ffaa44"></a-light>
+        <a-light type="spot" position="0 25 -30" intensity="1.2" color="#ffcc66" angle="30" target="0 15 -50"></a-light>
 
         <!-- Camera with WASD controls -->
         <a-entity 
@@ -255,7 +271,7 @@
         
         // Asset loading system
         let assetsLoaded = 0;
-        let totalAssets = 1; // Update this when you add more assets
+        let totalAssets = 2; // Updated to include both observatory and cat models
         
         function updateLoadingProgress() {
             const progress = Math.round((assetsLoaded / totalAssets) * 100);
@@ -274,6 +290,11 @@
             console.log('📦 3D Model loaded:', event.target.id);
             console.log('📦 Model element:', event.target);
             console.log('📦 Model position:', event.target.getAttribute('position'));
+            
+            // Special handling for cat model
+            if (event.target.id === 'giant-cat') {
+                console.log('🐱 Giant cat loaded successfully!');
+            }
         });
         
         document.addEventListener('model-error', function(event) {
@@ -321,7 +342,8 @@
                 
                 // Preload critical assets
                 const criticalAssets = [
-                    { path: '/assets/models/buildings/observatory.glb', options: { scale: 1.0 } }
+                    { path: '/assets/models/buildings/observatory.glb', options: { scale: 1.0 } },
+                    { path: '/assets/models/props/cat.glb', options: { scale: 1.0 } }
                 ];
                 
                 window.assetManager.preloadAssets(criticalAssets).then(() => {
