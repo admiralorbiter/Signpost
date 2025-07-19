@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Model Test - Signpost Observatory</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="../shared/components/asset-manager.js"></script>
+    <script src="../shared/components/building-component.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #001122;
+            color: white;
+        }
+        
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .status {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .success { background: rgba(0,255,0,0.2); color: #00ff00; }
+        .error { background: rgba(255,0,0,0.2); color: #ff0000; }
+        .info { background: rgba(0,0,255,0.2); color: #0088ff; }
+    </style>
+</head>
+<body>
+    <div class="debug-panel">
+        <h3>3D Model Test</h3>
+        <div id="status-log"></div>
+        <button onclick="testModelFile()">Test Model File</button>
+        <button onclick="testAssetManager()">Test Asset Manager</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <a-scene background="color: #001122">
+        <!-- Assets -->
+        <a-assets>
+            <a-asset-item id="test-observatory" src="/assets/models/buildings/observatory.glb"></a-asset-item>
+        </a-assets>
+        
+        <!-- Test Building -->
+        <a-entity 
+            id="test-building"
+            position="0 0 -5"
+            scale="1 1 1"
+            building-component="buildingType: observatory; scale: 1.0; interactive: true"
+            gltf-model="#test-observatory"
+            shadow="cast: true; receive: true">
+        </a-entity>
+        
+        <!-- Camera -->
+        <a-camera position="0 1.6 0"></a-camera>
+        
+        <!-- Lighting -->
+        <a-light type="ambient" intensity="0.5"></a-light>
+        <a-light type="directional" position="0 10 5" intensity="0.8"></a-light>
+    </a-scene>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('status-log');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            logDiv.appendChild(statusDiv);
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('status-log').innerHTML = '';
+        }
+        
+        function testModelFile() {
+            log('Testing model file accessibility...', 'info');
+            fetch('/assets/models/buildings/observatory.glb')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ Model file found and accessible', 'success');
+                        log(`File size: ${response.headers.get('content-length')} bytes`, 'info');
+                    } else {
+                        log(`❌ Model file not found: ${response.status}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error accessing model file: ${error}`, 'error');
+                });
+        }
+        
+        function testAssetManager() {
+            log('Testing Asset Manager...', 'info');
+            if (window.assetManager) {
+                log('✅ Asset Manager available', 'success');
+                const stats = window.assetManager.getStats();
+                log(`Asset Manager stats: ${JSON.stringify(stats)}`, 'info');
+            } else {
+                log('❌ Asset Manager not available', 'error');
+            }
+        }
+        
+        // Event listeners for debugging
+        document.addEventListener('model-loaded', function(event) {
+            log(`📦 Model loaded: ${event.target.id}`, 'success');
+        });
+        
+        document.addEventListener('model-error', function(event) {
+            log(`❌ Model error: ${event.target.id}`, 'error');
+            log(`Error details: ${JSON.stringify(event.detail)}`, 'error');
+        });
+        
+        document.addEventListener('building-loaded', function(event) {
+            log(`🏢 Building loaded: ${event.detail.buildingType}`, 'success');
+        });
+        
+        document.addEventListener('building-clicked', function(event) {
+            log(`🏢 Building clicked: ${event.detail.buildingType}`, 'info');
+        });
+        
+        // Scene loaded event
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded, initializing test...', 'info');
+            
+            const scene = document.querySelector('a-scene');
+            scene.addEventListener('loaded', function() {
+                log('✅ A-Frame scene loaded', 'success');
+            });
+            
+            scene.addEventListener('error', function(error) {
+                log(`❌ Scene error: ${error}`, 'error');
+            });
+        });
+        
+        // Initial test
+        setTimeout(() => {
+            testModelFile();
+            testAssetManager();
+        }, 1000);
+    </script>
+</body>
+</html> 

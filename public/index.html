@@ -5,6 +5,14 @@
     <title>The Signpost Observatory - VR Gateway</title>
     <meta name="description" content="A VR gateway to explore ideas, education, and the future">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    
+    <!-- Engine Components -->
+    <script src="../shared/components/engine.js"></script>
+    <script src="../shared/components/component-system.js"></script>
+    <script src="../shared/components/state-manager.js"></script>
+    <script src="../shared/components/asset-manager.js"></script>
+    <script src="../shared/components/building-component.js"></script>
+    
     <style>
         body {
             font-family: 'Georgia', serif;
@@ -42,6 +50,23 @@
             padding: 10px 20px;
             border-radius: 20px;
         }
+        
+        .asset-loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 2000;
+        }
+        
+        .asset-loading.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -49,10 +74,19 @@
         <h3>The Signpost Observatory</h3>
         <p>"All we can be now is the signposts for tomorrow and those that come after"</p>
         <p>Navigate through spaces that explore the intersection of technology, education, and human connection.</p>
+        <div id="asset-stats" style="margin-top: 10px; font-size: 12px; color: #888;">
+            Loading 3D assets...
+        </div>
     </div>
     
     <div class="controls">
-        <p>WASD to move • Mouse to look • Click on glowing portals to enter projects</p>
+        <p>WASD to move • Mouse to look • Space/Shift to fly up/down • Click on glowing portals to enter projects</p>
+    </div>
+    
+    <div id="asset-loading" class="asset-loading">
+        <h3>Loading 3D Assets...</h3>
+        <p>Please wait while we load the observatory and building models.</p>
+        <div id="loading-progress">0%</div>
     </div>
     
     <div id="fallback-message" style="
@@ -88,6 +122,10 @@
         
         <!-- Assets -->
         <a-assets>
+            <!-- 3D Models -->
+            <!-- Placeholder for your building model - replace with actual path -->
+            <a-asset-item id="observatory-building" src="/assets/models/buildings/observatory.glb"></a-asset-item>
+            
             <!-- Sounds -->
             <audio id="ambient-sound" src="" preload="auto" loop></audio>
             <audio id="portal-hum" src="" preload="auto" loop></audio>
@@ -105,7 +143,7 @@
         <!-- Environment -->
         <!-- Ground plane with subtle grid -->
         <a-plane 
-            position="0 0 0" 
+            position="0 -2 0" 
             rotation="-90 0 0" 
             width="200" 
             height="200" 
@@ -121,20 +159,44 @@
             material="color: #003366; metalness: 0.3; roughness: 0.7">
         </a-cylinder>
         
-        <!-- Central pillar with the main quote -->
+        <!-- Observatory Building - Replacing the central pillar -->
+        <a-entity 
+            id="observatory-building"
+            position="0 8 0"
+            scale="8 8 8"
+            building-component="buildingType: observatory; scale: 8.0; interactive: true; clickable: true; hoverable: true"
+            gltf-model="#observatory-building"
+            shadow="cast: true; receive: true">
+        </a-entity>
+        
+        <!-- Atmospheric glow around the building -->
+        <a-sphere 
+            position="0 8 0" 
+            radius="12" 
+            material="color: #4488cc; opacity: 0.1; transparent: true; emissive: #4488cc; emissiveIntensity: 0.2"
+            animation="property: scale; to: 1.2 1.2 1.2; dur: 4000; dir: alternate; loop: true">
+        </a-sphere>
+        
+        <!-- Central pillar with the main quote - moved up above the building -->
         <a-cylinder 
-            position="0 0.2 0" 
+            position="0 23 0" 
             radius="0.3" 
             height="3" 
             material="color: #004488; metalness: 0.5; roughness: 0.5">
         </a-cylinder>
         
         <a-text
-            position="0 2.5 0"
+            position="0 25.5 0"
             rotation="0 0 0"
             text="value: The Signpost Observatory; color: #ffffff; font: dejavu; align: center; width: 12"
             animation="property: rotation; to: 0 360 0; dur: 30000; loop: true">
         </a-text>
+        
+        <!-- 3D Building Models -->
+        <a-entity id="buildings-container">
+            <!-- Additional buildings can be added here -->
+            <!-- The main observatory building is now positioned centrally above -->
+        </a-entity>
         
         <!-- Dynamic Portals Container -->
         <a-entity id="dynamic-portals"></a-entity>
@@ -168,21 +230,20 @@
             material="color: #001133; opacity: 0.7; transparent: true">
         </a-triangle>
 
-
-        
         <!-- Lighting -->
-        <a-light type="ambient" intensity="0.3" color="#002244"></a-light>
-        <a-light type="directional" position="0 10 5" intensity="0.5" color="#4488cc"></a-light>
-        <a-light type="point" position="0 3 0" intensity="0.8" color="#66aaff"></a-light>
+        <a-light type="ambient" intensity="0.6" color="#4488cc"></a-light>
+        <a-light type="directional" position="0 20 10" intensity="1.0" color="#ffffff"></a-light>
+        <a-light type="point" position="0 10 0" intensity="1.5" color="#66aaff"></a-light>
+        <a-light type="spot" position="0 15 5" intensity="2.0" color="#ffffff" angle="45" target="0 0 0"></a-light>
 
         <!-- Camera with WASD controls -->
         <a-entity 
             id="rig" 
-            movement-controls="fly: false; speed: 0.1">
+            movement-controls="fly: true; speed: 0.2; constrainToNavMesh: false">
             <a-camera 
-                look-controls="pointerLockEnabled: true"
-                wasd-controls="acceleration: 15"
-                position="0 1.6 3"
+                look-controls="pointerLockEnabled: true; reverseMouseDrag: false"
+                wasd-controls="acceleration: 20; fly: true"
+                position="0 10 25"
                 cursor="fuse: false; rayOrigin: mouse">
             </a-camera>
         </a-entity>
@@ -192,9 +253,83 @@
         // Debug logging
         console.log('Signpost Observatory: Script loading...');
         
+        // Asset loading system
+        let assetsLoaded = 0;
+        let totalAssets = 1; // Update this when you add more assets
+        
+        function updateLoadingProgress() {
+            const progress = Math.round((assetsLoaded / totalAssets) * 100);
+            document.getElementById('loading-progress').textContent = `${progress}%`;
+            
+            if (assetsLoaded >= totalAssets) {
+                document.getElementById('asset-loading').classList.add('hidden');
+                console.log('✅ All 3D assets loaded');
+            }
+        }
+        
+        // Asset loading event listeners
+        document.addEventListener('model-loaded', function(event) {
+            assetsLoaded++;
+            updateLoadingProgress();
+            console.log('📦 3D Model loaded:', event.target.id);
+            console.log('📦 Model element:', event.target);
+            console.log('📦 Model position:', event.target.getAttribute('position'));
+        });
+        
+        document.addEventListener('model-error', function(event) {
+            console.error('❌ 3D Model failed to load:', event.target.id);
+            console.error('❌ Model error details:', event.detail);
+            // Still count as loaded to prevent infinite loading
+            assetsLoaded++;
+            updateLoadingProgress();
+        });
+        
+        // Building event listeners
+        document.addEventListener('building-loaded', function(event) {
+            console.log('🏢 Building loaded:', event.detail.buildingType);
+            console.log('🏢 Building element:', event.detail.element);
+        });
+        
+        document.addEventListener('building-clicked', function(event) {
+            console.log('🏢 Building clicked:', event.detail.buildingType);
+        });
+        
+        document.addEventListener('building-hover', function(event) {
+            console.log('🏢 Building hover:', event.detail.buildingType);
+        });
+        
         // Dynamic portal system
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Signpost Observatory: DOM loaded');
+            
+            // Test if the model file exists
+            fetch('/assets/models/buildings/observatory.glb')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('✅ Observatory model file found and accessible');
+                    } else {
+                        console.error('❌ Observatory model file not found:', response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error checking observatory model file:', error);
+                });
+            
+            // Initialize asset manager
+            if (window.assetManager) {
+                console.log('📦 Asset Manager initialized');
+                
+                // Preload critical assets
+                const criticalAssets = [
+                    { path: '/assets/models/buildings/observatory.glb', options: { scale: 1.0 } }
+                ];
+                
+                window.assetManager.preloadAssets(criticalAssets).then(() => {
+                    console.log('✅ Critical assets preloaded');
+                }).catch(error => {
+                    console.error('❌ Asset preloading failed:', error);
+                });
+            }
             
             // Load and create dynamic portals
             loadDynamicPortals();
@@ -312,6 +447,15 @@
                     `;
                     successIndicator.textContent = '✅ 3D Scene Loaded';
                     document.body.appendChild(successIndicator);
+                    
+                    // Update asset stats
+                    if (window.assetManager) {
+                        const stats = window.assetManager.getStats();
+                        document.getElementById('asset-stats').innerHTML = `
+                            Assets: ${stats.loadedAssets}/${stats.maxCacheSize}<br>
+                            Loading: ${stats.loadingAssets}
+                        `;
+                    }
                 });
                 
                 scene.addEventListener('error', function(error) {
@@ -331,8 +475,6 @@
                 fallbackMessage.style.display = 'block';
             }
         });
-        
-
         
         function showProjectModal(projectData) {
             const modal = document.createElement('div');

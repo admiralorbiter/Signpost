@@ -105,28 +105,128 @@ fetch('/api/data/kansas_city_intersections/raw?limit=1000')
 
 ---
 
-## 1. Executive Summary: Vision and Purpose
+## ✅ **Phase 2B Complete: Frontend Engine Components & 3D Asset Management**
 
-The **Signpost Observatory Engine** will be a modular, web-native framework for creating and deploying immersive VR and AR experiences. Its core purpose is to abstract the complexities of WebXR, device compatibility, and interaction design, allowing developers to focus on building meaningful content—from the "Classroom Time Machine" to the "Democracy Diagnosis Machine".
+**✅ COMPLETED FEATURES:**
+- **Core Engine Library (`engine.js`)**: Central JavaScript library for scene management, rendering, and game loop
+- **Component-Entity System**: Modular A-Frame components with building-specific functionality
+- **State Management**: Global state manager for scene and component state
+- **3D Asset Management System**: Complete GLB/GLTF model loading and management
+- **Building Component**: Specialized component for building models with interactions
+- **Asset Loading & Caching**: Performance-optimized asset loading with progress tracking
 
-The engine will prioritize:
-- [ ] **Rapid Prototyping:** Quickly build and test new "playground" ideas.
-- [ ] **Data Integration:** Seamlessly connect backend Python scripts and APIs to frontend visualizations.
-- [ ] **Component Reusability:** Create a library of shared components that can be used across multiple projects, as outlined in your `development-guide.md`.
-- [ ] **Performance by Default:** Ensure all experiences run smoothly on a range of devices, from desktop browsers to standalone VR headsets.
+### 🎯 **3D Asset Management System**
+
+**📦 Asset Manager Features:**
+- ✅ **GLB/GLTF Loading**: Primary support for binary GLTF format
+- ✅ **Asset Caching**: Intelligent caching system with configurable size limits
+- ✅ **Progress Tracking**: Real-time loading progress with visual indicators
+- ✅ **Error Handling**: Robust error handling with fallback mechanisms
+- ✅ **Asset Preloading**: Background preloading of critical assets
+- ✅ **Multiple Format Support**: GLB, GLTF, OBJ, FBX formats
+
+**🏗️ Building Component Features:**
+- ✅ **Building Types**: Observatory, library, laboratory, gallery, custom
+- ✅ **Interactive Events**: Click, hover, and building-specific actions
+- ✅ **Visual Effects**: Hover animations, click effects, and building-specific animations
+- ✅ **Physics Integration**: Automatic physics body creation when physics is enabled
+- ✅ **Shadow Casting**: Automatic shadow setup for realistic lighting
+- ✅ **Event System**: Comprehensive event system for building interactions
+
+**📁 Asset Directory Structure:**
+```
+public/assets/models/
+├── buildings/          # Building models (observatory, library, etc.)
+├── props/             # Interactive props and objects
+├── environment/       # Environmental objects (trees, rocks, etc.)
+├── characters/        # Character models (future use)
+└── vehicles/          # Vehicle models (future use)
+```
+
+### 🚀 **How to Use the 3D Asset System**
+
+#### **Adding Your Building Model**
+```bash
+# 1. Place your .glb file
+cp your-building.glb public/assets/models/buildings/observatory.glb
+
+# 2. The system automatically detects and loads it
+```
+
+#### **Asset Manager API**
+```javascript
+// Load a building model
+const building = await window.assetManager.loadAsset('/assets/models/buildings/observatory.glb', {
+    scale: 1.0,
+    position: { x: 0, y: 0, z: 0 }
+});
+
+// Create a building entity
+const buildingEntity = window.assetManager.createBuildingEntity('observatory', {
+    position: { x: 10, y: 0, z: 0 },
+    scale: 2.0,
+    components: {
+        'clickable': 'enabled: true',
+        'grabbable': 'enabled: false'
+    }
+});
+```
+
+#### **Building Component Usage**
+```html
+<a-entity 
+    id="observatory-building"
+    position="0 0 0"
+    scale="1 1 1"
+    building-component="buildingType: observatory; scale: 1.0; interactive: true; clickable: true; hoverable: true"
+    gltf-model="#observatory-building"
+    shadow="cast: true; receive: true">
+</a-entity>
+```
+
+#### **Event Handling**
+```javascript
+// Listen for building events
+document.addEventListener('building-loaded', (event) => {
+    console.log('Building loaded:', event.detail.buildingType);
+});
+
+document.addEventListener('building-clicked', (event) => {
+    console.log('Building clicked:', event.detail.buildingType);
+});
+
+document.addEventListener('observatory-activated', (event) => {
+    console.log('Observatory activated!');
+});
+```
+
+### 📊 **Current Status**
+
+**Working Engine Components:**
+- ✅ `engine.js` - Core engine library with scene management
+- ✅ `component-system.js` - Component-entity system
+- ✅ `state-manager.js` - Global state management
+- ✅ `asset-manager.js` - 3D asset loading and management
+- ✅ `building-component.js` - Building-specific functionality
+
+**Working Asset Features:**
+- ✅ GLB/GLTF model loading and caching
+- ✅ Building component with interactive events
+- ✅ Asset preloading and progress tracking
+- ✅ Error handling and fallback mechanisms
+- ✅ Performance optimization and statistics
+
+**Example Implementation:**
+- ✅ `public/index.html` - Updated with 3D asset system integration
+- ✅ `docs/3d-assets-guide.md` - Comprehensive guide for 3D assets
 
 ---
 
-## 🎯 **Next Priority: Phase 2B - Frontend Engine Components**
+## 🎯 **Next Priority: Phase 3 - AI & Advanced Systems**
 
-With the data processing pipeline complete, the next phase focuses on frontend engine development:
+With the frontend engine and 3D asset system complete, the next phase focuses on AI integration and advanced features:
 
-### **Phase 2B: Frontend Engine Components** (High Priority)
-- [ ] **Core Engine Library (`engine.js`)**: Central JavaScript library for scene management
-- [ ] **Component-Entity System**: Modular A-Frame components
-- [ ] **State Management**: Global state manager
-
-### **Phase 3: AI & Advanced Systems** (Medium Priority)
+### **Phase 3: AI & Advanced Systems** (High Priority)
 - [ ] **AI & Machine Learning Integration**: API endpoints for AI model integration
 - [ ] **Physics Engine**: Collision detection and rigid body dynamics
 - [ ] **Spatial Audio Engine**: 3D positional audio
@@ -187,146 +287,163 @@ This architecture is designed to support your current Flask and A-Frame stack wh
 
 #### 2.2. Frontend (JavaScript/A-Frame)
 
-- [ ] **Core Engine Library (`engine.js`):** A central JavaScript library that manages the scene, renderer, and core game loop.
-    - [ ] **Responsibilities:**
-        - [ ] Initializes the A-Frame scene and renderer.
-        - [ ] Manages the main update loop (`tick`).
-        - [ ] Handles global event listeners (e.g., for VR mode changes, device connection/disconnection).
-        - [ ] Provides utility functions for common tasks (e.g., vector math, raycasting).
+- [x] **Core Engine Library (`engine.js`):** ✅ **COMPLETED** - A central JavaScript library that manages the scene, renderer, and core game loop.
+    - [x] **Responsibilities:**
+        - [x] Initializes the A-Frame scene and renderer.
+        - [x] Manages the main update loop (`tick`).
+        - [x] Handles global event listeners (e.g., for VR mode changes, device connection/disconnection).
+        - [x] Provides utility functions for common tasks (e.g., vector math, raycasting).
 
-- [ ] **Component-Entity System:** Built on A-Frame's principles, this allows for modular and reusable features.
-    - [ ] **Structure:** A library of custom components that can be attached to entities to grant them behaviors (e.g., `<a-entity grabbable physics-body="type: dynamic">`).
-    - [ ] **Best Practices:** Components should be self-contained and communicate with other systems through events.
+- [x] **Component-Entity System:** ✅ **COMPLETED** - Built on A-Frame's principles, this allows for modular and reusable features.
+    - [x] **Structure:** A library of custom components that can be attached to entities to grant them behaviors (e.g., `<a-entity grabbable physics-body="type: dynamic">`).
+    - [x] **Best Practices:** Components should be self-contained and communicate with other systems through events.
 
-- [ ] **Rendering Pipeline:**
-    - [ ] **Stereoscopic Rendering:** Optimized for VR with single-pass instancing to reduce draw calls.
-    - [ ] **AR Overlay Support:** A rendering mode that can overlay the 3D scene onto a webcam feed or a mobile device's camera view.
-    - [ ] **Post-Processing Effects:** A framework for adding effects like bloom, depth of field, and custom shaders for projects like "The Invisible Illness Gallery".
+- [x] **State Management:** ✅ **COMPLETED** - Global state manager for managing scene state, component state, and user interactions.
+    - [x] **Features:**
+        - [x] Centralized state management
+        - [x] State persistence and restoration
+        - [x] Event-driven state updates
+        - [x] Component state synchronization
 
-- [ ] **State Management:** A global state manager to handle application-wide data (e.g., user position, current project, interaction state) and prevent conflicts between components.
-    - [ ] **Technology:** A simple JavaScript object or a lightweight state management library.
-    - [ ] **Purpose:** To provide a single source of truth for the application's state, making it easier to debug and manage.
+- [x] **3D Asset Management System:** ✅ **COMPLETED** - Comprehensive system for loading, caching, and managing 3D models.
+    - [x] **Features:**
+        - [x] GLB/GLTF model loading and caching
+        - [x] Asset preloading and progress tracking
+        - [x] Error handling and fallback mechanisms
+        - [x] Performance optimization and statistics
+        - [x] Building component with interactive events
+        - [x] Asset directory structure and organization
+
+- [ ] **Physics Engine:** Collision detection and rigid body dynamics for realistic interactions.
+    - [ ] **Features:**
+        - [ ] Rigid body physics
+        - [ ] Collision detection
+        - [ ] Constraint systems
+        - [ ] Physics debugging tools
+
+- [ ] **Spatial Audio Engine:** 3D positional audio for immersive sound experiences.
+    - [ ] **Features:**
+        - [ ] Positional audio sources
+        - [ ] Audio occlusion and reverb
+        - [ ] Dynamic audio mixing
+        - [ ] Audio visualization
+
+- [ ] **Animation System:** Advanced animation system with IK and procedural animation.
+    - [ ] **Features:**
+        - [ ] Animation mixer
+        - [ ] Inverse kinematics
+        - [ ] Procedural animation
+        - [ ] Animation blending
 
 ---
 
-## 3. Exhaustive Feature List
+## 3. Implementation Roadmap
 
-This list is broken down by category, providing a comprehensive toolkit for your project ideas.
+### **Phase 3: AI & Advanced Systems** (Next Priority)
 
-#### 3.1. Development & Workflow
+#### 3.1. AI & Machine Learning Integration
+- [ ] **API Endpoint Development:** Create `/api/ai/infer` endpoint
+- [ ] **Model Integration:** Connect to Python AI/ML libraries
+- [ ] **Text Analysis:** Implement text processing for dialogue systems
+- [ ] **Image Recognition:** Add computer vision capabilities
+- [ ] **Natural Language Processing:** Implement NLP for conversational AI
 
-- [x] **Dynamic Level Loader:** Automatically loads levels based on the file structure and configuration, as you've already implemented.
-- [x] **A-Frame Inspector Integration:** Continue using the `Ctrl+Alt+I` inspector for live scene debugging.
-- [ ] **Visual Scene Graph:** A 2D UI panel (in-browser) that displays the hierarchy of all entities in the scene, allowing for quick selection and debugging.
-    - [ ] **Features:**
-        - [ ] Tree view of the scene's entities.
-        - [ ] Clicking an entity in the graph highlights it in the 3D view.
-        - [ ] Displays key components and properties for the selected entity.
+#### 3.2. Physics Engine
+- [ ] **Physics Library Integration:** Integrate with A-Frame physics system
+- [ ] **Collision Detection:** Implement robust collision detection
+- [ ] **Rigid Body Dynamics:** Add realistic physics simulation
+- [ ] **Constraint Systems:** Implement joints and constraints
+- [ ] **Physics Debugging:** Add visualization tools for physics debugging
 
-- [ ] **Event Logging System:** A visual logger that displays custom engine events in real-time (e.g., `grab-start`, `portal-enter`, `dialogue-choice`).
-    - [ ] **Features:**
-        - [ ] A console-like overlay in the browser.
-        - [ ] Filter events by name or source entity.
-        - [ ] Timestamping for performance analysis.
+#### 3.3. Spatial Audio Engine
+- [ ] **Audio Library Integration:** Integrate with Web Audio API
+- [ ] **Positional Audio:** Implement 3D audio positioning
+- [ ] **Audio Occlusion:** Add sound blocking and reverb
+- [ ] **Dynamic Mixing:** Implement adaptive audio mixing
+- [ ] **Audio Visualization:** Add real-time audio visualization
 
-- [ ] **Performance HUD:** An in-VR display showing FPS, memory usage, and draw calls, toggleable with a key command.
-    - [ ] **Metrics:**
-        - [ ] Frames Per Second (FPS).
-        - [ ] Number of draw calls.
-        - [ ] Geometry and texture memory usage.
+#### 3.4. Animation System
+- [ ] **Animation Mixer:** Create centralized animation management
+- [ ] **Inverse Kinematics:** Implement IK for realistic movement
+- [ ] **Procedural Animation:** Add programmatic animation generation
+- [ ] **Animation Blending:** Implement smooth animation transitions
+- [ ] **Performance Optimization:** Optimize animation performance
 
-- [x] **CLI Tool for Project Scaffolding:** ✅ **COMPLETED** - A Python script to automatically create the folder structure and boilerplate files for a new project (e.g., `python manage.py create --name "my-experience" --category "education"`).
-    - [x] **Functionality:**
-        - [x] Creates the project directory within the correct category.
-        - [x] Generates a template `index.html` file with proper A-Frame setup.
-        - [x] Adds a basic entry to the project configuration file.
-        - [x] Auto-generates portal configuration with appropriate positioning and colors.
-        - [x] Provides project listing and detailed information commands.
+### **Phase 4: Future Goals** (Low Priority)
 
-#### 3.2. UI & Interaction Systems
+#### 4.1. Real-time Communication
+- [ ] **WebSocket Server:** Implement real-time communication
+- [ ] **Multiplayer Support:** Add multi-user experiences
+- [ ] **Room Management:** Create virtual room system
+- [ ] **Avatar System:** Implement user avatars
+- [ ] **Voice Chat:** Add real-time voice communication
 
-- [ ] **Unified UI Framework:**
-    - [ ] **Diegetic UI Components:** In-world UI elements (e.g., interactive panels, buttons on objects).
-    - [ ] **Non-Diegetic (HUD) Components:** 2D overlays for displaying information that follows the camera.
-    - [ ] **UI Events System:** A consistent way to handle clicks, hovers, and other interactions for both 2D and 3D UI.
+#### 4.2. Dialogue & Narrative System
+- [ ] **Conversation Engine:** Create branching dialogue system
+- [ ] **Narrative Management:** Implement story progression
+- [ ] **Character AI:** Add intelligent NPCs
+- [ ] **Emotion System:** Implement emotional responses
+- [ ] **Memory System:** Add persistent conversation memory
 
-- [ ] **Advanced Input & Tracking:**
-    - [ ] **Cross-Device Controller Abstraction:** A single API to handle input from Oculus Touch, HTC Vive wands, and other standard VR controllers.
-    - [ ] **Webcam-Based Hand Tracking:** Integration with libraries like MediaPipe to capture hand gestures from a standard webcam, enabling desktop users to interact more naturally.
-    - [ ] **Gaze-Based Interaction:** For accessibility and for experiences where hands are occupied.
-    - [ ] **Voice Command API:** An expansion of your existing system with more complex grammar and intent recognition.
-
-- [ ] **Interaction Components:**
-    - [ ] **Grabbable/Throwable:** A component to make objects physically interactive.
-    - [ ] **Clickable/Hoverable:** For triggering events on objects.
-    - [ ] **Teleportation System:** A robust and customizable teleport mechanic.
-    - [ ] **Draggable/Scalable:** For data visualization projects where users manipulate objects in the scene.
-
-- [ ] **Haptic Feedback API:** A simple function call to trigger haptic feedback on controllers, with support for varying intensity and duration.
-    - [ ] **Function:** `Engine.haptics.vibrate(hand, intensity, duration)`
-
-#### 3.3. Advanced Systems
-
-- [ ] **Physics Engine:**
-    - [ ] **Collision Detection:** Accurate and performant collision detection.
-    - [ ] **Rigid Body Dynamics:** For realistic object movement.
-    - [ ] **Raycasting:** For detecting what a user is looking at or pointing at.
-    - [ ] **Technology:** Integrate a library like `cannon-es`.
-
-- [ ] **Spatial Audio Engine:**
-    - [ ] **3D Positional Audio:** Sound that appears to come from a specific location in the scene.
-    - [ ] **Audio Occlusion:** Sounds are muffled when they are behind other objects.
-    - [ ] **Reverb Zones:** Define areas with different audio characteristics (e.g., a cave, a large hall).
-
-- [ ] **Animation System:**
-    - [ ] **Animation Mixer:** Blend multiple animations on a single model.
-    - [ ] **Inverse Kinematics (IK):** For realistic arm and body movements on avatars.
-    - [ ] **Timeline Editor:** A simple, in-browser tool to create and edit animation sequences for storytelling projects.
-
-- [ ] **Dialogue & Narrative System:**
-    - [ ] **Branching Dialogue Editor:** A visual tool to create branching conversations for projects like the "Socratic Dialogue Simulator".
-    - [ ] **Event-Driven Storytelling:** Trigger events in the scene based on dialogue choices.
-    - [ ] **Lip Syncing (Future):** Automated lip-syncing for characters based on audio input.
-
-#### 3.4. Multiplayer & Social Features (Future Goals)
-
-- [ ] **Networking Architecture:**
-    - [ ] **Room/Session Management:** Create and join named sessions.
-    - [ ] **State Synchronization:** Efficiently sync player positions, rotations, and object states.
-    - [ ] **Technology:** Use the WebSocket server for real-time communication.
-
-- [ ] **Player Representation:**
-    - [ ] **Basic Avatars:** Simple, customizable avatars.
-    - [ ] **Voice Chat Integration:** Built-in, low-latency voice communication.
-    - [ ] **Player Nameplates:** Display user names above their avatars.
-
-- [ ] **Real-time Communication Server (WebSockets):** Essential for multiplayer and collaborative experiences like "The Empathy Engine" or shared classroom environments.
-    - [ ] **Technology:** Flask-SocketIO or a similar library.
-    - [ ] **Functionality:** Handles real-time event broadcasting for player movement, object interactions, and chat messages.
-
-#### 3.5. Platform Support & Content Pipeline
-
-- [ ] **Asset Management System:**
-    - [ ] **Optimized Loading:** Load assets intelligently to minimize initial load times.
-    - [ ] **Support for Common Formats:** GLTF/GLB for models, PNG/JPG for textures, MP3 for audio.
-    - [ ] **Automated Asset Compression (Future):** A backend script to automatically optimize uploaded assets for web delivery.
-
-- [ ] **World Building Tools:**
-    - [ ] **Terrain Editor (Future):** A simple in-browser tool to create and sculpt terrain.
-    - [ ] **Procedural Content Generation (PCG) Hooks:** API hooks to allow Python scripts to generate content in the scene, perfect for projects like the "Apophenia Playground".
-    - [ ] **Prefab System:** Save and reuse groups of objects and their components.
-        - [ ] **Functionality:** A UI to select a group of entities and save them as a reusable "prefab" JSON file. Another UI to browse and spawn prefabs into the scene.
+#### 4.3. Multiplayer & Social Features
+- [ ] **User Management:** Implement user accounts and profiles
+- [ ] **Social Features:** Add friend systems and groups
+- [ ] **Content Sharing:** Enable experience sharing
+- [ ] **Collaboration Tools:** Add collaborative creation features
+- [ ] **Community Features:** Implement community moderation
 
 ---
 
-## 🎉 **Success Metrics**
+## 4. Technical Specifications
 
-✅ **Data Processing Pipeline**: Complete with real-world data integration  
-✅ **Interactive Visualizations**: Geographic mapping with Leaflet.js  
-✅ **JSON Serialization**: Proper handling of pandas/numpy data types  
-✅ **Error Handling**: Robust error handling for API and frontend  
-✅ **Statistics Dashboard**: Real-time metrics and insights  
-✅ **Portal Integration**: Automatic portal configuration and routing  
-✅ **Real-world Data**: 75,078 crash records and 13,008 intersections  
+### 4.1. Performance Requirements
+- **Target FPS:** 60 FPS on desktop, 72 FPS in VR
+- **Loading Time:** < 3 seconds for initial scene load
+- **Asset Size:** < 10MB for individual models
+- **Memory Usage:** < 2GB total memory usage
+- **Network:** Optimized for mobile and slow connections
 
-The Data Processing Pipeline is now fully functional with real-world data integration and ready for the next phase of your engine development!
+### 4.2. Compatibility Requirements
+- **Browsers:** Chrome 80+, Firefox 75+, Safari 13+
+- **VR Headsets:** Oculus Quest, HTC Vive, Valve Index
+- **Mobile:** iOS Safari, Android Chrome
+- **Desktop:** Windows, macOS, Linux
+
+### 4.3. Security Requirements
+- **Content Security Policy:** Strict CSP implementation
+- **Asset Validation:** Validate all loaded assets
+- **Input Sanitization:** Sanitize all user inputs
+- **CORS Configuration:** Proper CORS setup for assets
+- **Error Handling:** Graceful error handling without information leakage
+
+---
+
+## 5. Success Metrics
+
+### 5.1. Development Metrics
+- **Time to Prototype:** < 1 hour for new VR experience
+- **Component Reusability:** > 80% component reuse across projects
+- **Performance:** Maintain 60 FPS on target devices
+- **Asset Loading:** < 3 second load times for typical scenes
+
+### 5.2. User Experience Metrics
+- **Engagement:** > 5 minutes average session time
+- **Interactivity:** > 90% of interactive elements working correctly
+- **Accessibility:** Support for accessibility features
+- **Cross-platform:** Consistent experience across devices
+
+### 5.3. Technical Metrics
+- **Code Coverage:** > 80% test coverage
+- **Documentation:** Complete API documentation
+- **Performance:** < 100ms response time for API calls
+- **Reliability:** > 99.9% uptime for hosted experiences
+
+---
+
+## 6. Conclusion
+
+The Signpost Observatory Engine is designed to be a comprehensive, modular framework for creating immersive VR and AR experiences. With Phase 1 (Project Management), Phase 2A (Data Processing), and Phase 2B (Frontend Engine & 3D Assets) complete, the foundation is solid for building advanced AI-powered experiences.
+
+The next phase focuses on AI integration and advanced systems, which will enable sophisticated interactive experiences like the "AI Grader" and "Socratic Dialogue Simulator." The modular architecture ensures that new features can be added without breaking existing functionality.
+
+**Ready for Phase 3: AI & Advanced Systems!** 🚀
