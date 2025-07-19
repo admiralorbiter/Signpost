@@ -98,6 +98,34 @@ Experience convincing but fake scenarios alongside real ones. Learn to distingui
 
 ---
 
+## 🏥 Health & Medical Journey Experiences
+
+### **Organ Shortage Visualization Chamber**
+Stand in a room where floating organs represent the transplant waiting list. Watch as some disappear (successful transplants) while new ones appear (new patients). The mathematical reality of scarcity made visceral.
+
+### **The Immunosuppression Balance Beam**
+Walk a literal tightrope between infection risk and rejection risk. Environmental hazards (germs, viruses) approach from one side while rejection warnings flash from the other. Experience the constant calibration transplant patients navigate.
+
+### **Kidney Function Physics Lab**
+Shrink down to molecular size and experience how kidneys filter blood. When they fail, see how dialysis machines replicate this process. Turn complex biology into understandable mechanics.
+
+### **The Invisible Illness Gallery**
+Experience how chronic conditions affect daily activities. Stairs become mountains, brain fog creates literal visual static, fatigue adds physical weight to simple tasks.
+
+### **Transplant Timeline Corridor**
+Walk through the entire journey - from diagnosis through waiting list through surgery through recovery. Each room represents a different phase with its own challenges and victories.
+
+### **Quality of Life Metrics Playground**
+Adjust sliders for pain, mobility, energy, mood and watch your virtual world respond. Show how medical decisions affect lived experience, not just lab values.
+
+### **Healthcare Cost Reality Simulator**
+Watch your virtual bank account drain as you navigate medical billing. Show the real financial impact of illness on families.
+
+### **The Mortality Meditation Garden**
+A peaceful space for contemplating life's fragility and preciousness. Not morbid, but reflective - how does awareness of mortality change daily priorities?
+
+---
+
 ## 🎯 Quick Win Projects (Start Here)
 
 ### **The Attention Economy Stock Exchange**
