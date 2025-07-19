@@ -4,10 +4,19 @@
 
 ## 🎯 Overview
 
-The Signpost Observatory is a Flask-based VR gateway that uses A-Frame for 3D experiences. New levels are added by:
-1. Creating a standalone HTML file in the `public/` directory
-2. Adding portal configuration to `portal_config.py`
-3. Optionally adding shared components and assets
+The Signpost Observatory is a Flask-based VR gateway that uses A-Frame for 3D experiences. The system now features a **dynamic portal system** that automatically detects and serves only portals with actual level files.
+
+### New Dynamic System Benefits:
+- ✅ **No manual HTML editing** - Portals appear automatically
+- ✅ **Only shows working portals** - No broken links
+- ✅ **Organized by category** - Clear folder structure
+- ✅ **Automatic positioning** - No portal conflicts
+- ✅ **Real-time updates** - Changes appear immediately
+
+### Adding New Levels:
+1. Create a standalone HTML file in the appropriate category folder
+2. Add portal configuration to `portal_config.py`
+3. Optionally add shared components and assets
 
 ## 📁 Project Structure
 
@@ -18,7 +27,12 @@ Signpost/
 ├── requirements.txt          # Python dependencies
 ├── public/                  # Static files served by Flask
 │   ├── index.html           # Main VR gateway
-│   ├── your-level.html      # Your new level file
+│   ├── levels/              # Organized VR levels by category
+│   │   ├── education/       # Education-focused experiences
+│   │   ├── democracy/       # Democracy and political analysis
+│   │   ├── connection/      # Human connection and AI philosophy
+│   │   ├── analysis/        # Data visualization and analytics
+│   │   └── philosophy/      # Critical thinking and philosophy
 │   └── assets/              # Images, audio, textures
 ├── shared/                  # Reusable components
 │   ├── components/          # A-Frame components
@@ -31,7 +45,14 @@ Signpost/
 
 ### Step 1: Create the HTML File
 
-Create a new file in `public/` directory (e.g., `public/my-level.html`):
+Create a new file in the appropriate category folder (e.g., `public/levels/education/my-level.html`):
+
+**Available Categories:**
+- `education/` - Education-focused VR experiences
+- `democracy/` - Democracy and political analysis
+- `connection/` - Human connection and AI philosophy
+- `analysis/` - Data visualization and analytics
+- `philosophy/` - Critical thinking and philosophy
 
 ```html
 <!DOCTYPE html>
@@ -158,12 +179,92 @@ Add your level to `portal_config.py`:
 }
 ```
 
-### Step 3: Test Your Level
+### Step 3: Dynamic Portal System (Automatic)
+
+**NEW**: The portal system is now dynamic! You don't need to manually edit `index.html`. The system automatically:
+
+1. Scans the `public/levels/` directory for HTML files
+2. Creates portals only for levels that actually exist
+3. Positions portals automatically based on category
+4. Updates the gateway in real-time
+
+**No manual HTML editing required!** Just create your level file and add the portal configuration.
+
+### Step 4: Verify Flask Routing
+
+**Important**: The Flask server must be configured to serve HTML files from the organized level structure. Check that `app.py` includes these routes:
+
+```python
+@app.route('/<filename>')
+def serve_html(filename):
+    """Serve HTML files from the public directory"""
+    if filename.endswith('.html'):
+        return send_from_directory('public', filename)
+    else:
+        return jsonify({'error': 'File not found'}), 404
+
+@app.route('/levels/<category>/<level_name>')
+def serve_level(category, level_name):
+    """Serve levels from organized folder structure"""
+    if not level_name.endswith('.html'):
+        level_name += '.html'
+    return send_from_directory(f'public/levels/{category}', level_name)
+```
+
+If these routes are missing, add them to your `app.py` file before the API routes.
+
+### Step 5: Dynamic Navigation (Automatic)
+
+**NEW**: Navigation is now handled automatically by the dynamic portal system. The system:
+
+1. Automatically detects your level file in the organized folder structure
+2. Creates the correct navigation URL based on category and filename
+3. Handles all portal interactions dynamically
+
+**No manual JavaScript editing required!** The system automatically routes to `/levels/{category}/{level-name}`.
+
+### Step 6: Test Your Level
 
 1. Start the Flask server: `python app.py`
 2. Open `http://localhost:5000` in your browser
-3. Click on your new portal to enter your level
-4. Test navigation and interactions
+3. **Your portal appears automatically** if the level file exists
+4. Click on your new portal to enter your level
+5. Test navigation and interactions
+
+**Note:** The portal will only appear if:
+- The HTML file exists in the correct category folder
+- The portal configuration has the correct `category` field
+- The category folder exists in `public/levels/`
+
+## 🔧 Troubleshooting Common Issues
+
+### 404 Error When Accessing Level
+**Problem**: Getting a 404 error when clicking on your portal
+**Solution**: 
+1. Verify the Flask route exists in `app.py` (see Step 3 above)
+2. Check that your HTML file exists in the `public/` directory
+3. Ensure the filename matches exactly (case-sensitive)
+4. Restart the Flask server after making changes
+
+### Portal Not Visible in Gateway
+**Problem**: Portal doesn't appear in the main gateway
+**Solution**:
+1. Check that portal configuration is added to `portal_config.py`
+2. **CRITICAL**: Verify the `category` field matches the folder name in `public/levels/`
+3. Ensure the HTML file exists in the correct category folder
+4. Check that the category folder exists in `public/levels/`
+5. Verify the portal configuration has the correct `category` field
+6. Check browser console for JavaScript errors
+7. Refresh the page completely (Ctrl+F5) to clear cache
+8. Check the `/api/portals/available` endpoint to see if your portal is detected
+
+### Navigation Issues
+**Problem**: Can't navigate or interact with objects
+**Solution**:
+1. Verify A-Frame is loaded correctly
+2. Check that camera controls are enabled
+3. Ensure clickable elements have the `class="clickable"` attribute
+4. Test in different browsers (Chrome/Firefox recommended)
 
 ## 🎨 Level Design Guidelines
 
@@ -361,110 +462,91 @@ Use this template for consistent level creation:
 </html>
 ```
 
-## 🎯 Example: Quote Cloud Navigator
+## 🎯 Complete Example: Classroom Time Machine
 
-Here's a complete example of a simple level:
+Here's a complete example showing all the steps for adding a new level with the dynamic system:
 
-### HTML File (`public/quote-cloud.html`)
+### Step 1: HTML File (`public/levels/education/classroom-time-machine.html`)
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Quote Cloud Navigator - Signpost Observatory</title>
-    <meta name="description" content="Navigate through 3D space filled with meaningful quotes">
+    <title>Classroom Time Machine - Signpost Observatory</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- Your level content here -->
+</head>
+<body>
+    <!-- Your A-Frame scene here -->
+</body>
+</html>
+```
+
+### Step 2: Portal Configuration (`portal_config.py`)
+
+```python
+'classroom-time-machine': {
+    'id': 'classroom-time-machine',
+    'title': 'Classroom Time Machine',
+    'description': 'Experience education across decades',
+    'category': 'education',  # Must match folder name
+    'position': {'x': 5, 'y': 1, 'z': 5},
+    'color': '#00aa66',
+    'status': 'ready',
+    'project_data': {
+        'title': 'Classroom Time Machine',
+        'description': 'Experience the same classroom across different decades.',
+        'features': ['Time Travel', 'Education History', 'Visual Storytelling'],
+        'status': 'ready',
+        'eta': 'Now',
+        'progress': 100
+    }
+}
+```
+
+### Step 3: That's It!
+
+The portal appears automatically in the gateway. No manual HTML editing required!
+
+## 🎯 Example: Simple Level Structure
+
+Here's a minimal example of a level file:
+
+### HTML File (`public/levels/education/simple-example.html`)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Simple Example - Signpost Observatory</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <style>
-        body {
-            font-family: 'Georgia', serif;
-            margin: 0;
-            background: #0a0a0a;
-        }
-        
-        .ui-overlay {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            color: #e0e0e0;
-            font-size: 14px;
-            z-index: 1000;
-            background: rgba(0,0,0,0.7);
-            padding: 15px;
-            border-radius: 8px;
-            max-width: 300px;
-        }
+        body { font-family: 'Georgia', serif; margin: 0; background: #0a0a0a; }
+        .ui-overlay { position: fixed; top: 20px; left: 20px; color: #e0e0e0; 
+                     background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div class="ui-overlay">
-        <h3>Quote Cloud Navigator</h3>
-        <p>Float through 3D space filled with meaningful quotes from your writing.</p>
-        <p>Click on quotes to read the full article.</p>
+        <h3>Simple Example</h3>
+        <p>Your level description here.</p>
     </div>
 
-    <a-scene 
-        vr-mode-ui="enabled: true" 
-        embedded 
-        style="height: 100vh; width: 100vw;"
-        background="color: #001122"
-        fog="type: exponential; color: #001122; density: 0.0025">
+    <a-scene vr-mode-ui="enabled: true" embedded style="height: 100vh; width: 100vw;"
+             background="color: #001122">
         
-        <!-- Environment -->
-        <a-plane 
-            position="0 0 0" 
-            rotation="-90 0 0" 
-            width="100" 
-            height="100" 
-            material="color: #001a33">
-        </a-plane>
-        
-        <!-- Quote 1 -->
-        <a-box 
-            position="5 2 5" 
-            width="3" 
-            height="2" 
-            depth="0.1"
-            material="color: #00aa66; emissive: #003311"
-            class="clickable"
-            onclick="showQuote('All we can be now is the signposts for tomorrow...')">
-            
-            <a-text
-                position="0 0 0.06"
-                text="value: All we can be now is the signposts for tomorrow...; color: #ffffff; align: center; width: 4">
-            </a-text>
-        </a-box>
-        
-        <!-- Quote 2 -->
-        <a-box 
-            position="-3 3 8" 
-            width="3" 
-            height="2" 
-            depth="0.1"
-            material="color: #aa0066; emissive: #330022"
-            class="clickable"
-            onclick="showQuote('When the code listens better than the teacher...')">
-            
-            <a-text
-                position="0 0 0.06"
-                text="value: When the code listens better than the teacher...; color: #ffffff; align: center; width: 4">
-            </a-text>
-        </a-box>
+        <!-- Your 3D content here -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" 
+                 material="color: #001a33"></a-plane>
         
         <!-- Return portal -->
-        <a-box 
-            position="0 1 15" 
-            width="2" 
-            height="3" 
-            depth="0.3"
-            material="color: #4488cc; emissive: #112233"
-            onclick="window.location.href='/'"
-            class="clickable">
-            
-            <a-text
-                position="0 0 0.2"
-                text="value: Return to Gateway; color: #ffffff; align: center; width: 4">
-            </a-text>
+        <a-box position="0 1 10" width="2" height="3" depth="0.3"
+               material="color: #4488cc; emissive: #112233"
+               onclick="window.location.href='/'"
+               class="clickable">
+            <a-text position="0 0 0.2" text="value: Return to Gateway; color: #ffffff; align: center; width: 4"></a-text>
         </a-box>
         
         <!-- Camera -->
@@ -472,12 +554,6 @@ Here's a complete example of a simple level:
             <a-camera look-controls="enabled: true" wasd-controls="enabled: true"></a-camera>
         </a-entity>
     </a-scene>
-    
-    <script>
-        function showQuote(quote) {
-            alert('Quote: ' + quote + '\n\nFull article would open here.');
-        }
-    </script>
 </body>
 </html>
 ```
@@ -487,17 +563,18 @@ Here's a complete example of a simple level:
 Add to `portal_config.py`:
 
 ```python
-'quote-cloud': {
-    'id': 'quote-cloud',
-    'title': 'Quote Cloud Navigator',
-    'description': 'Navigate through 3D space filled with meaningful quotes',
-    'position': {'x': 10, 'y': 1, 'z': -10},
+'simple-example': {
+    'id': 'simple-example',
+    'title': 'Simple Example',
+    'description': 'A basic level template',
+    'category': 'education',  # Must match folder name
+    'position': {'x': 5, 'y': 1, 'z': 5},
     'color': '#00aa66',
     'status': 'ready',
     'project_data': {
-        'title': 'Quote Cloud Navigator',
-        'description': 'Float through 3D space filled with meaningful quotes from your writing. Each quote is a clickable portal to the full article.',
-        'features': ['3D Navigation', 'Interactive Quotes', 'Article Links', 'Immersive Reading'],
+        'title': 'Simple Example',
+        'description': 'A basic level template for learning.',
+        'features': ['Basic Navigation', 'Simple Interactions'],
         'status': 'ready',
         'eta': 'Now',
         'progress': 100
@@ -559,6 +636,8 @@ Before adding your level to the main project:
 
 - [ ] HTML file is complete and functional
 - [ ] Portal configuration is added to `portal_config.py`
+- [ ] Portal is added to main `index.html` file
+- [ ] Flask routing is configured to serve HTML files
 - [ ] All assets are optimized and properly linked
 - [ ] Navigation works correctly (WASD + mouse)
 - [ ] Return to gateway portal is included
@@ -580,6 +659,8 @@ When creating levels for this project:
 6. **Optimize for performance** (keep polygon counts low)
 7. **Test the integration** with the Flask server
 8. **Document any special features** or interactions
+9. **Verify Flask routing** is configured to serve HTML files
+10. **Add portal to main gateway** HTML file for visibility
 
 ### Example AI Prompt:
 "Create a VR level for the Signpost Observatory that [describe your concept]. The level should be educational, interactive, and follow the project's design guidelines. Include proper navigation, a return portal, and clear instructions."

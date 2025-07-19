@@ -136,101 +136,8 @@
             animation="property: rotation; to: 0 360 0; dur: 30000; loop: true">
         </a-text>
         
-        <!-- Project Portal 1: AI & Education -->
-        <a-box 
-            id="portal-education"
-            position="5 1 5" 
-            width="2" 
-            height="3" 
-            depth="0.3"
-            mixin="portal-material"
-            class="portal"
-            data-project="education">
-            
-            <a-text
-                mixin="signpost-text"
-                text="value: AI & Education\nInteractive Learning\nFutures; align: center"
-                position="0 0 0.2">
-            </a-text>
-        </a-box>
-        
-        <!-- Floating elements around education portal -->
-        <a-sphere position="4 2.5 4" radius="0.1" material="color: #00aa66; emissive: #003311"
-                 animation="property: position; to: 6 3.5 6; dur: 3000; dir: alternate; loop: true"></a-sphere>
-        <a-sphere position="6 2.2 4" radius="0.08" material="color: #0088aa; emissive: #002233"
-                 animation="property: position; to: 4 3.2 6; dur: 4000; dir: alternate; loop: true"></a-sphere>
-
-        <!-- Project Portal 2: Democracy & Technology -->
-        <a-box 
-            id="portal-democracy"
-            position="-5 1 5" 
-            width="2" 
-            height="3" 
-            depth="0.3"
-            mixin="portal-material"
-            class="portal"
-            data-project="democracy">
-            
-            <a-text
-                mixin="signpost-text"
-                text="value: Democracy &\nTechnology\nCritical Analysis; align: center"
-                position="0 0 0.2">
-            </a-text>
-        </a-box>
-        
-        <!-- Project Portal 3: Human Connection -->
-        <a-box 
-            id="portal-connection"
-            position="0 1 8" 
-            width="2" 
-            height="3" 
-            depth="0.3"
-            mixin="portal-material"
-            class="portal"
-            data-project="connection">
-            
-            <a-text
-                mixin="signpost-text"
-                text="value: Human Connection\nEmpathy & AI\nPhilosophical Inquiry; align: center"
-                position="0 0 0.2">
-            </a-text>
-        </a-box>
-
-        <!-- Project Portal 4: Data & Analysis -->
-        <a-box 
-            id="portal-analysis"
-            position="-5 1 -3" 
-            width="2" 
-            height="3" 
-            depth="0.3"
-            mixin="portal-material"
-            class="portal"
-            data-project="analysis">
-            
-            <a-text
-                mixin="signpost-text"
-                text="value: Data Visualization\nCrime Analytics\nUrban Studies; align: center"
-                position="0 0 0.2">
-            </a-text>
-        </a-box>
-
-        <!-- Project Portal 5: Quote Cloud Navigator -->
-        <a-box 
-            id="portal-quote-cloud"
-            position="8 1 -8" 
-            width="2" 
-            height="3" 
-            depth="0.3"
-            mixin="portal-material"
-            class="portal"
-            data-project="quote-cloud">
-            
-            <a-text
-                mixin="signpost-text"
-                text="value: Quote Cloud\nNavigator\nAnalytical Insights; align: center"
-                position="0 0 0.2">
-            </a-text>
-        </a-box>
+        <!-- Dynamic Portals Container -->
+        <a-entity id="dynamic-portals"></a-entity>
 
         <!-- Atmospheric elements -->
         <!-- Floating quote fragments -->
@@ -286,35 +193,97 @@
         // Debug logging
         console.log('Signpost Observatory: Script loading...');
         
-        // Portal interaction system with backend integration
+        // Dynamic portal system
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Signpost Observatory: DOM loaded');
             
-            const portals = document.querySelectorAll('.portal');
-            console.log('Signpost Observatory: Found', portals.length, 'portals');
-            
-            // Load portal data from backend
-            loadPortalData();
-            
-            portals.forEach(portal => {
-                console.log('Signpost Observatory: Setting up portal:', portal.getAttribute('data-project'));
+            // Load and create dynamic portals
+            loadDynamicPortals();
+        });
+        
+        async function loadDynamicPortals() {
+            try {
+                const response = await fetch('/api/portals/available');
+                const availablePortals = await response.json();
+                console.log('Signpost Observatory: Loaded available portals:', availablePortals);
                 
-                portal.addEventListener('click', function() {
-                    const project = this.getAttribute('data-project');
-                    console.log('Signpost Observatory: Portal clicked:', project);
-                    handlePortalClick(project);
+                createDynamicPortals(availablePortals);
+            } catch (error) {
+                console.error('Error loading dynamic portals:', error);
+            }
+        }
+        
+        function createDynamicPortals(portals) {
+            const dynamicPortalsContainer = document.getElementById('dynamic-portals');
+            if (!dynamicPortalsContainer) {
+                console.error('Dynamic portals container not found');
+                return;
+            }
+            
+            portals.forEach((portal, index) => {
+                const portalElement = createPortalElement(portal, index);
+                dynamicPortalsContainer.appendChild(portalElement);
+                
+                // Add event listeners
+                portalElement.addEventListener('click', function() {
+                    console.log('Signpost Observatory: Portal clicked:', portal.id);
+                    handleDynamicPortalClick(portal);
                 });
                 
                 // Hover effects
-                portal.addEventListener('mouseenter', function() {
+                portalElement.addEventListener('mouseenter', function() {
                     this.setAttribute('animation__hover', 'property: scale; to: 1.1 1.1 1.1; dur: 300');
                 });
                 
-                portal.addEventListener('mouseleave', function() {
+                portalElement.addEventListener('mouseleave', function() {
                     this.setAttribute('animation__hover', 'property: scale; to: 1 1 1; dur: 300');
                 });
             });
-        });
+            
+            console.log('Signpost Observatory: Created', portals.length, 'dynamic portals');
+        }
+        
+        function createPortalElement(portal, index) {
+            const position = portal.position || {x: 0, y: 1, z: 0};
+            const color = portal.color || '#4488cc';
+            
+            const portalElement = document.createElement('a-box');
+            portalElement.setAttribute('id', `portal-${portal.id}`);
+            portalElement.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+            portalElement.setAttribute('width', '2');
+            portalElement.setAttribute('height', '3');
+            portalElement.setAttribute('depth', '0.3');
+            portalElement.setAttribute('mixin', 'portal-material');
+            portalElement.setAttribute('class', 'portal');
+            portalElement.setAttribute('data-project', portal.id);
+            portalElement.setAttribute('data-category', portal.category);
+            portalElement.setAttribute('data-default-level', portal.default_level);
+            
+            // Create text element
+            const textElement = document.createElement('a-text');
+            textElement.setAttribute('mixin', 'signpost-text');
+            textElement.setAttribute('text', `value: ${portal.title}\n${portal.description}; align: center`);
+            textElement.setAttribute('position', '0 0 0.2');
+            
+            portalElement.appendChild(textElement);
+            
+            return portalElement;
+        }
+        
+        function handleDynamicPortalClick(portal) {
+            console.log(`Entering ${portal.id} project`);
+            
+            if (portal.default_level) {
+                // Navigate directly to the level
+                const levelUrl = `/levels/${portal.category}/${portal.default_level}`;
+                console.log('Navigating to:', levelUrl);
+                window.location.href = levelUrl;
+                return;
+            }
+            
+            // Fallback to project modal for portals without levels
+            showProjectModal(portal.project_data);
+        }
         
         // A-Frame scene loaded event
         document.addEventListener('DOMContentLoaded', function() {
@@ -379,12 +348,6 @@
         async function handlePortalClick(project) {
             console.log(`Entering ${project} project`);
             
-            // Special handling for quote-cloud - navigate directly to the level
-            if (project === 'quote-cloud') {
-                window.location.href = '/quote_cloud_level.html';
-                return;
-            }
-            
             try {
                 const response = await fetch(`/api/projects/${project}`);
                 const projectData = await response.json();
@@ -397,8 +360,7 @@
                     'education': 'Future: Interactive AI tutoring systems, virtual classrooms with adaptive learning environments, and tools for addressing the education pipeline collapse.',
                     'democracy': 'Future: Simulations of democratic processes, visualization of political data, and interactive explorations of the threats to democratic norms.',
                     'connection': 'Future: VR experiences exploring human-AI empathy, virtual therapy environments, and philosophical spaces for contemplating consciousness.',
-                    'analysis': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.',
-                    'quote-cloud': 'Navigate through 3D space filled with meaningful quotes exploring education, democracy, human connection, and data analysis. Click to enter the Quote Cloud Navigator.'
+                    'analysis': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.'
                 };
                 
                 showProjectModal({

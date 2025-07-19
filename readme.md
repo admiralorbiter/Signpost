@@ -52,6 +52,12 @@ A WebXR gateway built with A-Frame that serves as the entry point to a collectio
 Signpost/
 ├── public/                    # Frontend static files
 │   ├── index.html            # Main VR gateway experience
+│   ├── levels/               # Organized VR levels by category
+│   │   ├── education/        # Education-focused experiences
+│   │   ├── democracy/        # Democracy and political analysis
+│   │   ├── connection/       # Human connection and AI philosophy
+│   │   ├── analysis/         # Data visualization and analytics
+│   │   └── philosophy/       # Critical thinking and philosophy
 │   └── assets/               # Media assets
 │       ├── audio/            # Sound files
 │       └── textures/         # Image textures
@@ -65,8 +71,10 @@ Signpost/
 │   └── utils/               # JavaScript utilities
 ├── docs/                    # Documentation
 │   ├── development-guide.md
-│   └── project-roadmap.md
+│   ├── project-roadmap.md
+│   └── level-organization.md # Level organization guide
 ├── app.py                   # Flask backend server
+├── portal_config.py         # Portal configuration and management
 ├── start_simple.py          # Simple Python server (no dependencies)
 ├── requirements.txt          # Python dependencies
 └── README.md               # This file
@@ -81,8 +89,10 @@ Signpost/
 - **Responsive Design**: Works on desktop and mobile browsers
 
 ### Backend API
+- **Dynamic Portal System**: Automatically detects and serves only portals with actual level files
 - **Portal Data**: Dynamic portal information served via REST API
 - **Project Details**: Detailed information about each VR experience
+- **Level Management**: Organized level structure with category-based routing
 - **Health Monitoring**: Server status and performance metrics
 - **Security**: CORS support and error handling
 
@@ -132,7 +142,11 @@ pip install -r requirements.txt  # Install Flask dependencies
 ### API Endpoints
 - `GET /api/health` - Server health check
 - `GET /api/portals` - List all available portals
+- `GET /api/portals/available` - List only portals with actual level files
 - `GET /api/projects/:id` - Get specific project details
+- `GET /api/levels/available` - List all available levels across categories
+- `GET /api/levels/:category` - List levels in specific category
+- `GET /levels/:category/:level` - Serve level files from organized structure
 
 ### Environment Variables
 ```bash
@@ -178,6 +192,8 @@ CMD ["python", "app.py"]
 ## 📚 Documentation
 
 - [Development Guide](./docs/development-guide.md) - Comprehensive development information
+- [Adding New Levels](./adding_level.md) - Guide for creating new VR levels
+- [Level Organization](./docs/level-organization.md) - Level organization and folder structure
 - [Project Roadmap](./docs/project-roadmap.md) - Future development plans
 
 ## 🤝 Contributing

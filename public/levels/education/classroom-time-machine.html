@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Classroom Time Machine - Signpost Observatory</title>
+    <meta name="description" content="Experience education across different decades">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            background: #0a0a0a;
+        }
+        
+        .ui-overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #e0e0e0;
+            font-size: 14px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 320px;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ccc;
+            text-align: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui-overlay">
+        <h3>Classroom Time Machine</h3>
+        <p>Experience the same classroom across different decades, showing the decline of education funding through visual storytelling.</p>
+        <p><strong>Instructions:</strong> Walk through different time periods to see how education has changed.</p>
+    </div>
+    
+    <div class="controls">
+        <p>WASD to move • Mouse to look • ESC to return to gateway</p>
+    </div>
+
+    <a-scene 
+        vr-mode-ui="enabled: true" 
+        embedded 
+        style="height: 100vh; width: 100vw;"
+        background="color: #001122"
+        fog="type: exponential; color: #001122; density: 0.0025">
+        
+        <!-- Environment -->
+        <a-plane 
+            position="0 0 0" 
+            rotation="-90 0 0" 
+            width="50" 
+            height="50" 
+            material="color: #001a33">
+        </a-plane>
+        
+        <!-- Central classroom structure -->
+        <a-box 
+            position="0 2 0" 
+            width="20" 
+            height="4" 
+            depth="15"
+            material="color: #00aa66; opacity: 0.8; transparent: true">
+        </a-box>
+        
+        <!-- Time period indicators -->
+        <a-text
+            position="0 4 0"
+            text="value: Classroom Time Machine\n1950s → 2020s; color: #ffffff; align: center; width: 8">
+        </a-text>
+        
+        <!-- 1950s classroom -->
+        <a-entity position="-8 1 0">
+            <a-box width="8" height="3" depth="6" material="color: #aa6644"></a-box>
+            <a-text position="0 2 3.1" text="value: 1950s\nWell-Funded; color: #ffffff; align: center; width: 4"></a-text>
+        </a-entity>
+        
+        <!-- 2020s classroom -->
+        <a-entity position="8 1 0">
+            <a-box width="8" height="3" depth="6" material="color: #6644aa"></a-box>
+            <a-text position="0 2 3.1" text="value: 2020s\nUnderfunded; color: #ffffff; align: center; width: 4"></a-text>
+        </a-entity>
+        
+        <!-- Return to gateway portal -->
+        <a-box 
+            position="0 1 15" 
+            width="2" 
+            height="3" 
+            depth="0.3"
+            material="color: #4488cc; emissive: #112233"
+            onclick="window.location.href='/'"
+            class="clickable">
+            
+            <a-text
+                position="0 0 0.2"
+                text="value: Return to Gateway; color: #ffffff; align: center; width: 4">
+            </a-text>
+        </a-box>
+        
+        <!-- Camera -->
+        <a-entity position="0 1.6 10">
+            <a-camera look-controls="enabled: true" wasd-controls="enabled: true"></a-camera>
+        </a-entity>
+    </a-scene>
+    
+    <script>
+        console.log('Classroom Time Machine loaded successfully');
+        
+        // ESC key handling
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                if (confirm('Return to Signpost Observatory?')) {
+                    window.location.href = '/';
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

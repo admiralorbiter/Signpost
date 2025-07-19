@@ -10,6 +10,7 @@ PORTAL_CONFIG = {
         'id': 'education',
         'title': 'AI & Education',
         'description': 'Interactive Learning Futures',
+        'category': 'education',
         'position': {'x': 5, 'y': 1, 'z': 5},
         'color': '#00aa66',
         'status': 'development',
@@ -28,6 +29,7 @@ PORTAL_CONFIG = {
         'id': 'democracy',
         'title': 'Democracy & Technology',
         'description': 'Critical Analysis',
+        'category': 'democracy',
         'position': {'x': -5, 'y': 1, 'z': 5},
         'color': '#aa0066',
         'status': 'development',
@@ -46,6 +48,7 @@ PORTAL_CONFIG = {
         'id': 'connection',
         'title': 'Human Connection',
         'description': 'Empathy & AI Philosophical Inquiry',
+        'category': 'connection',
         'position': {'x': 0, 'y': 1, 'z': 8},
         'color': '#0066aa',
         'status': 'development',
@@ -64,6 +67,7 @@ PORTAL_CONFIG = {
         'id': 'analysis',
         'title': 'Data Visualization',
         'description': 'Crime Analytics Urban Studies',
+        'category': 'analysis',
         'position': {'x': -5, 'y': 1, 'z': -3},
         'color': '#aa6600',
         'status': 'development',
@@ -76,22 +80,8 @@ PORTAL_CONFIG = {
             'progress': 5
         }
     },
-    'quote-cloud': {
-        'id': 'quote-cloud',
-        'title': 'Quote Cloud Navigator',
-        'description': 'Navigate through meaningful quotes from analytical writing',
-        'position': {'x': 8, 'y': 1, 'z': -8},
-        'color': '#cc8844',
-        'status': 'ready',
-        'project_data': {
-            'title': 'Quote Cloud Navigator',
-            'description': 'Float through 3D space filled with meaningful quotes exploring education, democracy, human connection, and data analysis.',
-            'features': ['Interactive Quotes', 'Contextual Analysis', '3D Navigation', 'Thematic Organization'],
-            'status': 'ready',
-            'eta': 'Now',
-            'progress': 100
-        }
-    },
+
+
 }
 
 # Template for adding new portals
@@ -139,6 +129,52 @@ def update_portal_status(portal_id, status):
         PORTAL_CONFIG[portal_id]['project_data']['status'] = status
         return True
     return False
+
+def get_portals_with_levels():
+    """Get only portals that have actual level files"""
+    import os
+    available_portals = []
+    
+    for portal_id, portal_config in PORTAL_CONFIG.items():
+        category = portal_config.get('category')
+        if category:
+            # Check if there are any HTML files in the category folder
+            category_path = f'public/levels/{category}'
+            if os.path.exists(category_path):
+                html_files = [f for f in os.listdir(category_path) if f.endswith('.html')]
+                if html_files:
+                    # Add the first level as the default
+                    portal_config['default_level'] = html_files[0].replace('.html', '')
+                    portal_config['available_levels'] = [f.replace('.html', '') for f in html_files]
+                    available_portals.append(portal_config)
+    
+    return available_portals
+
+def get_portal_position(portal_id, index=0):
+    """Get automatic position for portal based on category and index"""
+    category_positions = {
+        'education': {'x': 5, 'y': 1, 'z': 5},
+        'democracy': {'x': -5, 'y': 1, 'z': 5},
+        'connection': {'x': 0, 'y': 1, 'z': 8},
+        'analysis': {'x': -5, 'y': 1, 'z': -3},
+        'philosophy': {'x': 8, 'y': 1, 'z': -8}
+    }
+    
+    portal_config = PORTAL_CONFIG.get(portal_id, {})
+    category = portal_config.get('category')
+    
+    if category and category in category_positions:
+        base_pos = category_positions[category]
+        # Offset multiple portals in same category
+        offset = index * 3
+        return {
+            'x': base_pos['x'] + offset,
+            'y': base_pos['y'],
+            'z': base_pos['z'] + offset
+        }
+    
+    # Fallback position
+    return {'x': 0, 'y': 1, 'z': 0}
 
 # Example of how to add a new portal
 def add_example_portal():

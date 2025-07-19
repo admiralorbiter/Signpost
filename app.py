@@ -28,6 +28,57 @@ def serve_html(filename):
     else:
         return jsonify({'error': 'File not found'}), 404
 
+@app.route('/levels/<category>/<level_name>')
+def serve_level(category, level_name):
+    """Serve levels from organized folder structure"""
+    if not level_name.endswith('.html'):
+        level_name += '.html'
+    return send_from_directory(f'public/levels/{category}', level_name)
+
+@app.route('/api/levels/<category>')
+def get_levels_in_category(category):
+    """Get list of available levels in a category"""
+    import os
+    category_path = f'public/levels/{category}'
+    if not os.path.exists(category_path):
+        return jsonify({'error': 'Category not found'}), 404
+    
+    levels = []
+    for filename in os.listdir(category_path):
+        if filename.endswith('.html'):
+            levels.append(filename.replace('.html', ''))
+    
+    return jsonify({
+        'category': category,
+        'levels': levels,
+        'count': len(levels)
+    })
+
+@app.route('/api/levels/available')
+def get_available_levels():
+    """Get all available levels across all categories"""
+    import os
+    available_levels = {}
+    
+    levels_dir = 'public/levels'
+    if not os.path.exists(levels_dir):
+        return jsonify({'error': 'Levels directory not found'}), 404
+    
+    for category in os.listdir(levels_dir):
+        category_path = os.path.join(levels_dir, category)
+        if os.path.isdir(category_path):
+            levels = []
+            for filename in os.listdir(category_path):
+                if filename.endswith('.html'):
+                    levels.append(filename.replace('.html', ''))
+            if levels:  # Only include categories with actual levels
+                available_levels[category] = levels
+    
+    return jsonify({
+        'available_levels': available_levels,
+        'total_levels': sum(len(levels) for levels in available_levels.values())
+    })
+
 @app.route('/api/health')
 def health():
     """Health check endpoint"""
@@ -43,6 +94,13 @@ def health():
 def get_portals():
     """Get all available portals"""
     return jsonify(PORTALS)
+
+@app.route('/api/portals/available')
+def get_available_portals():
+    """Get only portals that have actual level files"""
+    from portal_config import get_portals_with_levels
+    available_portals = get_portals_with_levels()
+    return jsonify(available_portals)
 
 @app.route('/api/projects/<project_id>')
 def get_project(project_id):
