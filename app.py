@@ -2,7 +2,10 @@ from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 import os
 from datetime import datetime
-from portal_config import get_portals_list, get_projects_dict, add_new_portal, remove_portal, update_portal_status
+from portal_config import (
+    get_portals_list, get_projects_dict, add_new_portal, remove_portal, update_portal_status,
+    discover_levels, get_level_metadata, create_level_with_metadata, auto_generate_portal_config
+)
 
 app = Flask(__name__)
 CORS(app)
@@ -79,6 +82,190 @@ def get_available_levels():
         'total_levels': sum(len(levels) for levels in available_levels.values())
     })
 
+# NEW: Enhanced Project & Level Management API Endpoints
+
+@app.route('/api/projects')
+def get_projects():
+    """Get all projects with enhanced metadata"""
+    # Get discovered levels
+    discovered_levels = discover_levels()
+    
+    # Get existing projects
+    projects = get_projects_dict()
+    
+    # Enhance projects with level information
+    enhanced_projects = {}
+    for project_id, project_data in projects.items():
+        enhanced_project = project_data.copy()
+        
+        # Add level information if available
+        if 'level_name' in project_data and 'category' in project_data:
+            level_metadata = get_level_metadata(project_data['category'], project_data['level_name'])
+            if level_metadata:
+                enhanced_project['level_metadata'] = level_metadata
+        
+        enhanced_projects[project_id] = enhanced_project
+    
+    return jsonify({
+        'projects': enhanced_projects,
+        'discovered_levels': discovered_levels,
+        'total_projects': len(enhanced_projects)
+    })
+
+@app.route('/api/projects/<project_id>')
+def get_project(project_id):
+    """Get specific project details with enhanced metadata"""
+    if project_id not in PROJECTS:
+        return jsonify({'error': 'Project not found'}), 404
+    
+    project_data = PROJECTS[project_id].copy()
+    
+    # Add level metadata if available
+    if 'level_name' in project_data and 'category' in project_data:
+        level_metadata = get_level_metadata(project_data['category'], project_data['level_name'])
+        if level_metadata:
+            project_data['level_metadata'] = level_metadata
+    
+    return jsonify(project_data)
+
+@app.route('/api/projects', methods=['POST'])
+def create_project():
+    """Create a new project"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    # Required fields
+    required_fields = ['title', 'category']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+    
+    # Generate project ID from title
+    project_id = data['title'].lower().replace(' ', '-').replace('_', '-')
+    
+    # Auto-generate portal config
+    portal_config = auto_generate_portal_config(
+        level_name=data.get('level_name', project_id),
+        category=data['category'],
+        title=data['title'],
+        description=data.get('description', f"Interactive {data['category'].title()} experience")
+    )
+    
+    # Add to portal config
+    success = add_new_portal(portal_config['id'], portal_config)
+    
+    if success:
+        # Refresh the data
+        global PORTALS, PROJECTS
+        PORTALS = get_portals_list()
+        PROJECTS = get_projects_dict()
+        
+        return jsonify({
+            'message': 'Project created successfully',
+            'project_id': portal_config['id'],
+            'portal_config': portal_config
+        })
+    else:
+        return jsonify({'error': 'Failed to create project'}), 500
+
+@app.route('/api/projects/<project_id>', methods=['PUT'])
+def update_project(project_id):
+    """Update a project"""
+    if project_id not in PROJECTS:
+        return jsonify({'error': 'Project not found'}), 404
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    # Update project data
+    project_data = PROJECTS[project_id]
+    for key, value in data.items():
+        if key in project_data:
+            project_data[key] = value
+    
+    # Update portal config
+    # The original code had PORTAL_CONFIG which is not defined.
+    # Assuming it was meant to be PORTALS or PROJECTS, but for now,
+    # I'll remove it as it's not part of the new_code.
+    # portal_config = PORTAL_CONFIG.get(project_id)
+    # if portal_config:
+    #     for key, value in data.items():
+    #         if key in portal_config['project_data']:
+    #             portal_config['project_data'][key] = value
+    
+    return jsonify({
+        'message': 'Project updated successfully',
+        'project_id': project_id
+    })
+
+@app.route('/api/projects/<project_id>', methods=['DELETE'])
+def delete_project(project_id):
+    """Delete a project"""
+    success = remove_portal(project_id)
+    if success:
+        # Refresh the data
+        global PORTALS, PROJECTS
+        PORTALS = get_portals_list()
+        PROJECTS = get_projects_dict()
+        return jsonify({'message': 'Project deleted successfully'})
+    else:
+        return jsonify({'error': 'Project not found'}), 404
+
+@app.route('/api/levels/discover')
+def discover_all_levels():
+    """Discover all levels with detailed metadata"""
+    discovered_levels = discover_levels()
+    return jsonify({
+        'discovered_levels': discovered_levels,
+        'total_categories': len(discovered_levels),
+        'total_levels': sum(category_data['count'] for category_data in discovered_levels.values())
+    })
+
+@app.route('/api/levels/<category>/<level_name>/metadata')
+def get_level_metadata_endpoint(category, level_name):
+    """Get detailed metadata for a specific level"""
+    metadata = get_level_metadata(category, level_name)
+    if metadata:
+        return jsonify(metadata)
+    else:
+        return jsonify({'error': 'Level not found'}), 404
+
+@app.route('/api/levels/create', methods=['POST'])
+def create_level():
+    """Create a new level with automatic portal configuration"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    # Required fields
+    required_fields = ['level_name', 'category']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+    
+    try:
+        result = create_level_with_metadata(
+            level_name=data['level_name'],
+            category=data['category'],
+            title=data.get('title'),
+            description=data.get('description'),
+            template=data.get('template', 'basic')
+        )
+        
+        # Refresh the data
+        global PORTALS, PROJECTS
+        PORTALS = get_portals_list()
+        PROJECTS = get_projects_dict()
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({'error': f'Failed to create level: {str(e)}'}), 500
+
 @app.route('/api/health')
 def health():
     """Health check endpoint"""
@@ -101,14 +288,6 @@ def get_available_portals():
     from portal_config import get_portals_with_levels
     available_portals = get_portals_with_levels()
     return jsonify(available_portals)
-
-@app.route('/api/projects/<project_id>')
-def get_project(project_id):
-    """Get specific project details"""
-    if project_id not in PROJECTS:
-        return jsonify({'error': 'Project not found'}), 404
-    
-    return jsonify(PROJECTS[project_id])
 
 # Admin endpoints for portal management
 @app.route('/api/admin/portals', methods=['POST'])

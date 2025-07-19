@@ -3,6 +3,10 @@ Portal Configuration for Signpost Observatory
 Easy way to add new portals and manage existing ones
 """
 
+import os
+import json
+from datetime import datetime
+
 # Portal Configuration
 PORTAL_CONFIG = {
     # Education Portal
@@ -228,6 +232,277 @@ def get_portal_position(portal_id, index=0):
     
     # Fallback position
     return {'x': 0, 'y': 1, 'z': 0}
+
+# NEW: Enhanced Project & Level Management API Functions
+
+def discover_levels():
+    """Automatically discover all levels in the levels directory"""
+    levels_data = {}
+    levels_dir = 'public/levels'
+    
+    if not os.path.exists(levels_dir):
+        return levels_data
+    
+    for category in os.listdir(levels_dir):
+        category_path = os.path.join(levels_dir, category)
+        if os.path.isdir(category_path):
+            levels = []
+            for filename in os.listdir(category_path):
+                if filename.endswith('.html'):
+                    level_name = filename.replace('.html', '')
+                    level_path = os.path.join(category_path, filename)
+                    
+                    # Get file stats for metadata
+                    stat = os.stat(level_path)
+                    
+                    level_data = {
+                        'name': level_name,
+                        'filename': filename,
+                        'category': category,
+                        'url': f'/levels/{category}/{level_name}',
+                        'created': datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                        'size': stat.st_size
+                    }
+                    
+                    # Try to read level metadata from HTML file
+                    try:
+                        with open(level_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            # Extract title from HTML
+                            import re
+                            title_match = re.search(r'<title>(.*?)</title>', content, re.IGNORECASE)
+                            if title_match:
+                                level_data['title'] = title_match.group(1).strip()
+                            else:
+                                level_data['title'] = level_name.replace('-', ' ').title()
+                            
+                            # Extract description from meta tag
+                            desc_match = re.search(r'<meta name="description" content="(.*?)"', content, re.IGNORECASE)
+                            if desc_match:
+                                level_data['description'] = desc_match.group(1).strip()
+                            
+                            # Check for VR/AR specific meta tags
+                            vr_meta = re.search(r'<meta name="vr-mode" content="(.*?)"', content, re.IGNORECASE)
+                            if vr_meta:
+                                level_data['vr_mode'] = vr_meta.group(1).strip()
+                            
+                    except Exception as e:
+                        level_data['title'] = level_name.replace('-', ' ').title()
+                        level_data['error'] = f"Could not read metadata: {str(e)}"
+                    
+                    levels.append(level_data)
+            
+            if levels:
+                levels_data[category] = {
+                    'category': category,
+                    'levels': levels,
+                    'count': len(levels)
+                }
+    
+    return levels_data
+
+def get_level_metadata(category, level_name):
+    """Get detailed metadata for a specific level"""
+    level_path = f'public/levels/{category}/{level_name}.html'
+    
+    if not os.path.exists(level_path):
+        return None
+    
+    stat = os.stat(level_path)
+    
+    metadata = {
+        'name': level_name,
+        'category': category,
+        'url': f'/levels/{category}/{level_name}',
+        'created': datetime.fromtimestamp(stat.st_ctime).isoformat(),
+        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+        'size': stat.st_size,
+        'file_path': level_path
+    }
+    
+    # Try to extract more metadata from the HTML file
+    try:
+        with open(level_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            import re
+            
+            # Extract title
+            title_match = re.search(r'<title>(.*?)</title>', content, re.IGNORECASE)
+            if title_match:
+                metadata['title'] = title_match.group(1).strip()
+            
+            # Extract description
+            desc_match = re.search(r'<meta name="description" content="(.*?)"', content, re.IGNORECASE)
+            if desc_match:
+                metadata['description'] = desc_match.group(1).strip()
+            
+            # Extract VR/AR specific tags
+            vr_meta = re.search(r'<meta name="vr-mode" content="(.*?)"', content, re.IGNORECASE)
+            if vr_meta:
+                metadata['vr_mode'] = vr_meta.group(1).strip()
+            
+            # Extract A-Frame specific data
+            aframe_entities = re.findall(r'<a-entity[^>]*>', content)
+            metadata['entity_count'] = len(aframe_entities)
+            
+            # Check for specific components
+            components = []
+            if 'position' in content:
+                components.append('position')
+            if 'rotation' in content:
+                components.append('rotation')
+            if 'scale' in content:
+                components.append('scale')
+            if 'geometry' in content:
+                components.append('geometry')
+            if 'material' in content:
+                components.append('material')
+            if 'animation' in content:
+                components.append('animation')
+            if 'sound' in content:
+                components.append('sound')
+            
+            metadata['components'] = components
+            
+    except Exception as e:
+        metadata['error'] = f"Could not read metadata: {str(e)}"
+    
+    return metadata
+
+def auto_generate_portal_config(level_name, category, title=None, description=None):
+    """Automatically generate portal configuration for a new level"""
+    # Generate a portal ID from the level name
+    portal_id = level_name.replace('-', '_')
+    
+    # Get automatic position
+    position = get_portal_position(portal_id)
+    
+    # Generate color based on category
+    category_colors = {
+        'education': '#00aa66',
+        'democracy': '#aa0066', 
+        'connection': '#0066aa',
+        'analysis': '#aa6600',
+        'philosophy': '#6600aa'
+    }
+    color = category_colors.get(category, '#4488cc')
+    
+    # Generate title if not provided
+    if not title:
+        title = level_name.replace('-', ' ').title()
+    
+    # Generate description if not provided
+    if not description:
+        description = f"Interactive {category.title()} experience: {title}"
+    
+    portal_config = {
+        'id': portal_id,
+        'title': title,
+        'description': description,
+        'category': category,
+        'position': position,
+        'color': color,
+        'status': 'ready',
+        'project_data': {
+            'title': title,
+            'description': description,
+            'features': ['VR Experience', 'Interactive Elements', 'Immersive Design'],
+            'status': 'ready',
+            'eta': 'Available Now',
+            'progress': 100,
+            'level_name': level_name,
+            'category': category
+        }
+    }
+    
+    return portal_config
+
+def create_level_with_metadata(level_name, category, title=None, description=None, template='basic'):
+    """Create a new level with automatic metadata and optional portal config"""
+    level_dir = f'public/levels/{category}'
+    level_path = f'{level_dir}/{level_name}.html'
+    
+    # Create directory if it doesn't exist
+    os.makedirs(level_dir, exist_ok=True)
+    
+    # Generate title if not provided
+    if not title:
+        title = level_name.replace('-', ' ').title()
+    
+    # Generate description if not provided
+    if not description:
+        description = f"Interactive {category.title()} experience: {title}"
+    
+    # Create basic HTML template
+    html_template = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{title}</title>
+    <meta name="description" content="{description}">
+    <meta name="vr-mode" content="vr">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+</head>
+<body>
+    <a-scene
+        vr-mode-ui="enabled: true"
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        renderer="logarithmicDepthBuffer: true;"
+        antialias="true"
+        stats>
+        
+        <!-- Environment -->
+        <a-assets>
+            <!-- Add your assets here -->
+        </a-assets>
+        
+        <!-- Camera -->
+        <a-entity id="camera" position="0 1.6 0">
+            <a-camera look-controls wasd-controls>
+                <a-cursor></a-cursor>
+            </a-camera>
+        </a-entity>
+        
+        <!-- Lighting -->
+        <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
+        <a-light type="directional" position="0 10 5" color="#ffffff" intensity="0.8"></a-light>
+        
+        <!-- Ground -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#cccccc"></a-plane>
+        
+        <!-- Your content goes here -->
+        <a-box position="0 1 0" color="#ff0000" animation="property: rotation; to: 0 360 0; dur: 2000; easing: linear; loop: true"></a-box>
+        
+        <!-- Navigation back to gateway -->
+        <a-entity position="0 0 -5">
+            <a-plane position="0 1.5 0" width="2" height="1" color="#0066cc" 
+                     link="href: /; title: Back to Gateway"></a-plane>
+            <a-text value="Back to Gateway" position="0 1.5 0.1" align="center" color="#ffffff"></a-text>
+        </a-entity>
+        
+    </a-scene>
+</body>
+</html>"""
+    
+    # Write the file
+    with open(level_path, 'w', encoding='utf-8') as f:
+        f.write(html_template)
+    
+    # Auto-generate portal config
+    portal_config = auto_generate_portal_config(level_name, category, title, description)
+    
+    # Add to portal config
+    add_new_portal(portal_config['id'], portal_config)
+    
+    return {
+        'level_created': level_path,
+        'portal_config': portal_config,
+        'message': f'Level "{title}" created successfully in category "{category}"'
+    }
 
 # Example of how to add a new portal
 def add_example_portal():
