@@ -20,6 +20,14 @@ def index():
     """Serve the main VR gateway"""
     return send_from_directory('public', 'index.html')
 
+@app.route('/<filename>')
+def serve_html(filename):
+    """Serve HTML files from the public directory"""
+    if filename.endswith('.html'):
+        return send_from_directory('public', filename)
+    else:
+        return jsonify({'error': 'File not found'}), 404
+
 @app.route('/api/health')
 def health():
     """Health check endpoint"""

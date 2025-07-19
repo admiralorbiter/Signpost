@@ -75,7 +75,23 @@ PORTAL_CONFIG = {
             'eta': 'Q1 2025',
             'progress': 5
         }
-    }
+    },
+    'quote-cloud': {
+        'id': 'quote-cloud',
+        'title': 'Quote Cloud Navigator',
+        'description': 'Navigate through meaningful quotes from analytical writing',
+        'position': {'x': 8, 'y': 1, 'z': -8},
+        'color': '#cc8844',
+        'status': 'ready',
+        'project_data': {
+            'title': 'Quote Cloud Navigator',
+            'description': 'Float through 3D space filled with meaningful quotes exploring education, democracy, human connection, and data analysis.',
+            'features': ['Interactive Quotes', 'Contextual Analysis', '3D Navigation', 'Thematic Organization'],
+            'status': 'ready',
+            'eta': 'Now',
+            'progress': 100
+        }
+    },
 }
 
 # Template for adding new portals

@@ -214,6 +214,24 @@
             </a-text>
         </a-box>
 
+        <!-- Project Portal 5: Quote Cloud Navigator -->
+        <a-box 
+            id="portal-quote-cloud"
+            position="8 1 -8" 
+            width="2" 
+            height="3" 
+            depth="0.3"
+            mixin="portal-material"
+            class="portal"
+            data-project="quote-cloud">
+            
+            <a-text
+                mixin="signpost-text"
+                text="value: Quote Cloud\nNavigator\nAnalytical Insights; align: center"
+                position="0 0 0.2">
+            </a-text>
+        </a-box>
+
         <!-- Atmospheric elements -->
         <!-- Floating quote fragments -->
         <a-text
@@ -361,6 +379,12 @@
         async function handlePortalClick(project) {
             console.log(`Entering ${project} project`);
             
+            // Special handling for quote-cloud - navigate directly to the level
+            if (project === 'quote-cloud') {
+                window.location.href = '/quote_cloud_level.html';
+                return;
+            }
+            
             try {
                 const response = await fetch(`/api/projects/${project}`);
                 const projectData = await response.json();
@@ -373,7 +397,8 @@
                     'education': 'Future: Interactive AI tutoring systems, virtual classrooms with adaptive learning environments, and tools for addressing the education pipeline collapse.',
                     'democracy': 'Future: Simulations of democratic processes, visualization of political data, and interactive explorations of the threats to democratic norms.',
                     'connection': 'Future: VR experiences exploring human-AI empathy, virtual therapy environments, and philosophical spaces for contemplating consciousness.',
-                    'analysis': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.'
+                    'analysis': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.',
+                    'quote-cloud': 'Navigate through 3D space filled with meaningful quotes exploring education, democracy, human connection, and data analysis. Click to enter the Quote Cloud Navigator.'
                 };
                 
                 showProjectModal({
