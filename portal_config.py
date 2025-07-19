@@ -80,8 +80,61 @@ PORTAL_CONFIG = {
             'progress': 5
         }
     },
-
-
+    'attention-economy-exchange': {
+        'id': 'attention-economy-exchange',
+        'title': 'Attention Economy Exchange',
+        'description': 'Interactive moral simulation: You ARE the product being traded',
+        'category': 'analysis',  # Fits in the data visualization and analytics category
+        'position': {'x': -8, 'y': 1, 'z': 8},  # Adjust position as needed for your gateway layout
+        'color': '#ff3333',  # Red color to represent the danger/warning theme
+        'status': 'ready',
+        'project_data': {
+            'title': 'The Attention Economy Stock Exchange - Interactive Moral Simulation',
+            'description': 'Step into the role of a Junior Attention Broker in this immersive moral simulation. You will face real choices that tech companies make daily: deploy psychological manipulation for profit, or refuse and watch competitors succeed. Experience both sides of surveillance capitalism - as the manipulator AND the manipulated. Make trades that hook millions of users, witness the human cost of your decisions, and ultimately choose between whistleblowing heroism or corrupted villainy. This is not just education - it\'s an interactive moral laboratory that reveals the true mechanics of digital manipulation.',
+            'features': [
+                'Interactive moral choice system with real consequences',
+                'Play as both predator and prey in the attention economy',
+                'Multiple branching storylines with hero/villain endings',
+                'Real-time corruption tracking and life degradation',
+                'Face-to-face encounters with your victims',
+                'Authentic trader terminals with manipulation tools',
+                'Dynamic environmental storytelling',
+                'Whistleblower finale with multiple endings',
+                'Educational overlay revealing real manipulation tactics',
+                'Immersive 3D trading floor with atmospheric effects'
+            ],
+            'gameplay_mechanics': [
+                'Moral decision engine: Every choice has lasting consequences',
+                'Corruption meter: Watch your soul degrade with each evil choice',
+                'Victim interaction: Meet the people harmed by your decisions',
+                'Resource management: Your humanity vs. your profit',
+                'Multiple endings based on your moral choices',
+                'Real-time environmental degradation reflecting your corruption'
+            ],
+            'status': 'ready',
+            'eta': 'Available Now',
+            'progress': 100,
+            'educational_value': 'Maximum - Visceral understanding of surveillance capitalism through interactive moral choices',
+            'target_audience': 'General public, educators, policymakers, tech workers questioning their industry',
+            'unique_vr_elements': [
+                'Stand on the auction block where YOU are being sold',
+                'Physical interaction with manipulation tools',
+                'Spatial relationship between your actions and victims',
+                '360-degree immersion in the attention economy',
+                'Environmental storytelling through 3D space',
+                'Embodied moral choices through VR interaction'
+            ],
+            'key_insights': [
+                'Experience being both manipulator and victim simultaneously',
+                'Understand the psychology behind infinite scroll and variable rewards',
+                'Feel the weight of moral choices in tech development',
+                'Witness the human cost of surveillance capitalism',
+                'Learn why "free" platforms are actually the most expensive',
+                'Understand how individual choices compound into societal harm'
+            ],
+            'real_world_impact': 'Prepares users to recognize and resist digital manipulation in their daily lives while understanding the systemic nature of attention capitalism'
+        }
+    },
 }
 
 # Template for adding new portals

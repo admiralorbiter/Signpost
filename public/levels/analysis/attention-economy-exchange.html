@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>The Attention Economy Stock Exchange - Signpost Observatory</title>
+    <meta name="description" content="You ARE the product being traded. Experience the gamified nightmare of attention capitalism.">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            background: #0a0a0a;
+        }
+        
+        .game-ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #e0e0e0;
+            font-size: 14px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            border: 2px solid #00ff88;
+        }
+        
+        .life-meter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: #ff4444;
+            font-size: 16px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #ff3333;
+            min-width: 250px;
+        }
+
+        .action-prompts {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff88;
+            text-align: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ccc;
+            text-align: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+
+        .interaction-help {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff88;
+            text-align: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 1px solid #00ff88;
+            font-size: 14px;
+        }
+
+        .story-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            font-size: 18px;
+            text-align: center;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .story-text {
+            max-width: 600px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .story-button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .story-button:hover {
+            background: #00cc66;
+            transform: scale(1.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff3333, #ffaa00, #00ff88);
+            transition: width 0.5s ease;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- Story Introduction -->
+    <div id="story-intro" class="story-overlay">
+        <div class="story-text">
+            <h2>🎭 Welcome to the Attention Economy Exchange</h2>
+            <p>You've just been hired as a Junior Attention Broker. Your job? Maximize the trading value of human consciousness.</p>
+            <p>But here's the twist: <strong>YOU are also a product being traded.</strong></p>
+            <p>Navigate the moral dilemmas of surveillance capitalism while trying to survive as both predator and prey.</p>
+        </div>
+        <button class="story-button" onclick="startGame()">Enter the Trading Floor</button>
+    </div>
+
+    <!-- Game UI -->
+    <div id="game-ui" class="game-ui hidden">
+        <h3>📊 Broker Dashboard</h3>
+        <p><strong>Your Attention Value:</strong> <span id="player-value">$45.50/hr</span></p>
+        <p><strong>Manipulation Score:</strong> <span id="manipulation-score">0</span></p>
+        <p><strong>Targets Hooked:</strong> <span id="targets-hooked">0</span></p>
+        <p><strong>Moral Corruption:</strong></p>
+        <div class="progress-bar">
+            <div id="corruption-bar" class="progress-fill" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Life Meter -->
+    <div id="life-meter" class="life-meter hidden">
+        <h4>⚡ Your Digital Life Force</h4>
+        <div><strong>Focus:</strong> <span id="focus-level">100%</span></div>
+        <div><strong>Privacy:</strong> <span id="privacy-level">100%</span></div>
+        <div><strong>Free Will:</strong> <span id="freewill-level">100%</span></div>
+        <div><strong>Mental Health:</strong> <span id="mental-health">100%</span></div>
+    </div>
+
+    <!-- Action Prompts -->
+    <div id="action-prompts" class="action-prompts hidden">
+        <div id="current-action">Click the glowing terminals to make trades</div>
+    </div>
+    
+    <div class="interaction-help hidden" id="interaction-help">
+        <div>👁️ Green crosshair shows where you're looking • Look at glowing objects and click</div>
+    </div>
+    
+    <div class="controls hidden" id="controls">
+        <p>WASD to move • Mouse to look around • Look at glowing objects and CLICK • ESC for menu</p>
+    </div>
+
+    <a-scene 
+        vr-mode-ui="enabled: true" 
+        embedded 
+        style="height: 100vh; width: 100vw;"
+        background="color: #000611"
+        fog="type: exponential; color: #000611; density: 0.002"
+        loading-screen="enabled: false">
+        
+        <!-- Assets -->
+        <a-assets>
+            <!-- Custom components -->
+            <a-mixin id="terminal-glow" material="color: #001133; emissive: #0088ff; emissiveIntensity: 0.8" 
+                     animation="property: material.emissiveIntensity; to: 0.3; dur: 1000; dir: alternate; loop: true"></a-mixin>
+            <a-mixin id="victim-glow" material="color: #330000; emissive: #ff4400; emissiveIntensity: 0.6"
+                     animation="property: material.emissiveIntensity; to: 0.1; dur: 1500; dir: alternate; loop: true"></a-mixin>
+            <a-mixin id="money-particle" material="color: #00ff00; emissive: #004400"
+                     animation="property: position; to: 0 10 0; dur: 3000; loop: true"></a-mixin>
+        </a-assets>
+
+        <!-- Trading Floor Base -->
+        <a-plane 
+            position="0 0 0" 
+            rotation="-90 0 0" 
+            width="100" 
+            height="100" 
+            material="color: #001122; roughness: 0.9">
+        </a-plane>
+
+        <!-- Central Player Platform (where you stand as the product) -->
+        <a-cylinder
+            id="player-platform"
+            position="0 0.5 0"
+            radius="3"
+            height="1"
+            material="color: #ff3333; emissive: #440000; emissiveIntensity: 0.4"
+            animation="property: rotation; to: 0 360 0; dur: 30000; loop: true">
+            
+            <a-text
+                position="0 0.6 0"
+                text="value: YOU ARE HERE\nBEING TRADED; color: #ffffff; align: center; width: 8"
+                animation="property: text.color; to: #ff0000; dur: 1000; dir: alternate; loop: true">
+            </a-text>
+        </a-cylinder>
+
+        <!-- Interactive Trading Terminals (the main game mechanic) -->
+        <!-- Terminal 1: Social Media Manipulation -->
+        <a-box
+            id="social-terminal"
+            position="-8 2 -8"
+            width="2"
+            height="4"
+            depth="1"
+            mixin="terminal-glow"
+            class="clickable interactive">
+            
+            <a-text
+                position="0 2.5 0.6"
+                text="value: SOCIAL MEDIA\nMANIPULATION; color: #00ffff; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 1 0.6"
+                text="value: Deploy Infinite\nScroll Algorithm; color: #ffffff; align: center; width: 4">
+            </a-text>
+            
+            <a-text
+                position="0 -0.5 0.6"
+                text="value: Value: $15,000; color: #00ff00; align: center; width: 5">
+            </a-text>
+
+            <!-- Floating money particles -->
+            <a-sphere position="1 3 0" radius="0.1" mixin="money-particle"></a-sphere>
+            <a-sphere position="-1 3.5 0" radius="0.1" mixin="money-particle" 
+                     animation="property: position; to: -1 8 0; dur: 2500; loop: true"></a-sphere>
+        </a-box>
+
+        <!-- Terminal 2: Data Harvesting -->
+        <a-box
+            id="data-terminal"
+            position="8 2 -8"
+            width="2"
+            height="4"
+            depth="1"
+            mixin="terminal-glow"
+            class="clickable interactive">
+            
+            <a-text
+                position="0 2.5 0.6"
+                text="value: DATA\nHARVESTING; color: #00ffff; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 1 0.6"
+                text="value: Sell Location\nTracking Data; color: #ffffff; align: center; width: 4">
+            </a-text>
+            
+            <a-text
+                position="0 -0.5 0.6"
+                text="value: Value: $25,000; color: #00ff00; align: center; width: 5">
+            </a-text>
+
+            <a-sphere position="1.2 3.2 0" radius="0.1" mixin="money-particle"></a-sphere>
+            <a-sphere position="-0.8 3.8 0" radius="0.1" mixin="money-particle" 
+                     animation="property: position; to: -0.8 9 0; dur: 2200; loop: true"></a-sphere>
+        </a-box>
+
+        <!-- Terminal 3: Psychological Profiling -->
+        <a-box
+            id="psych-terminal"
+            position="-8 2 8"
+            width="2"
+            height="4"
+            depth="1"
+            mixin="terminal-glow"
+            class="clickable interactive">
+            
+            <a-text
+                position="0 2.5 0.6"
+                text="value: PSYCHOLOGICAL\nPROFILING; color: #00ffff; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 1 0.6"
+                text="value: Deploy Fear-Based\nMarketing; color: #ffffff; align: center; width: 4">
+            </a-text>
+            
+            <a-text
+                position="0 -0.5 0.6"
+                text="value: Value: $35,000; color: #00ff00; align: center; width: 5">
+            </a-text>
+
+            <a-sphere position="0.9 3.6 0" radius="0.1" mixin="money-particle"></a-sphere>
+            <a-sphere position="-1.1 3.1 0" radius="0.1" mixin="money-particle" 
+                     animation="property: position; to: -1.1 8.5 0; dur: 2800; loop: true"></a-sphere>
+        </a-box>
+
+        <!-- Terminal 4: Addiction Engineering -->
+        <a-box
+            id="addiction-terminal"
+            position="8 2 8"
+            width="2"
+            height="4"
+            depth="1"
+            mixin="terminal-glow"
+            class="clickable interactive">
+            
+            <a-text
+                position="0 2.5 0.6"
+                text="value: ADDICTION\nENGINEERING; color: #00ffff; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 1 0.6"
+                text="value: Variable Reward\nSchedules; color: #ffffff; align: center; width: 4">
+            </a-text>
+            
+            <a-text
+                position="0 -0.5 0.6"
+                text="value: Value: $50,000; color: #00ff00; align: center; width: 5">
+            </a-text>
+
+            <a-sphere position="1.3 3.4 0" radius="0.1" mixin="money-particle"></a-sphere>
+            <a-sphere position="-0.7 3.9 0" radius="0.1" mixin="money-particle" 
+                     animation="property: position; to: -0.7 9.2 0; dur: 2600; loop: true"></a-sphere>
+        </a-box>
+
+        <!-- Victim Pods (representing other users being manipulated) -->
+        <!-- These show the human cost of your actions -->
+        <a-cylinder
+            id="victim-1"
+            position="12 1.5 0"
+            radius="1.5"
+            height="3"
+            mixin="victim-glow"
+            class="clickable victim"
+            onclick="examineVictim(1)">
+            
+            <a-text
+                position="0 2 1.6"
+                text="value: TEEN USER\nADDICTED; color: #ff4444; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 0.5 1.6"
+                text="value: Screen Time:\n8hrs/day; color: #ffffff; align: center; width: 4">
+            </a-text>
+            
+            <a-text
+                position="0 -1 1.6"
+                text="value: Mental Health: ⬇️; color: #ff6666; align: center; width: 4">
+            </a-text>
+        </a-cylinder>
+
+        <a-cylinder
+            id="victim-2"
+            position="-12 1.5 0"
+            radius="1.5"
+            height="3"
+            mixin="victim-glow"
+            class="clickable victim"
+            onclick="examineVictim(2)">
+            
+            <a-text
+                position="0 2 1.6"
+                text="value: PARENT\nDISTRACTED; color: #ff4444; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 0.5 1.6"
+                text="value: Family Time:\nLOST; color: #ffffff; align: center; width: 4">
+            </a-text>
+            
+            <a-text
+                position="0 -1 1.6"
+                text="value: Relationships: ⬇️; color: #ff6666; align: center; width: 4">
+            </a-text>
+        </a-cylinder>
+
+        <a-cylinder
+            id="victim-3"
+            position="0 1.5 -12"
+            radius="1.5"
+            height="3"
+            mixin="victim-glow"
+            class="clickable victim"
+            onclick="examineVictim(3)">
+            
+            <a-text
+                position="0 2 1.6"
+                text="value: ELDERLY USER\nSCAMMED; color: #ff4444; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 0.5 1.6"
+                text="value: Savings:\nDRAINED; color: #ffffff; align: center; width: 4">
+            </a-text>
+            
+            <a-text
+                position="0 -1 1.6"
+                text="value: Trust: ⬇️; color: #ff6666; align: center; width: 4">
+            </a-text>
+        </a-cylinder>
+
+        <!-- Moral Choice Portal (escape route) -->
+        <a-box
+            id="moral-portal"
+            position="0 2 15"
+            width="4"
+            height="5"
+            depth="1"
+            material="color: #00ff88; emissive: #004422; emissiveIntensity: 0.6"
+            class="clickable"
+            onclick="triggerMoralChoice()"
+            animation="property: material.emissiveIntensity; to: 1.0; dur: 2000; dir: alternate; loop: true">
+            
+            <a-text
+                position="0 1.5 0.6"
+                text="value: BLOW THE\nWHISTLE; color: #ffffff; align: center; width: 8">
+            </a-text>
+            
+            <a-text
+                position="0 0 0.6"
+                text="value: Expose the System; color: #ffffff; align: center; width: 6">
+            </a-text>
+            
+            <a-text
+                position="0 -1.5 0.6"
+                text="value: End the Game; color: #ffffff; align: center; width: 6">
+            </a-text>
+        </a-box>
+
+        <!-- Exit Portal -->
+        <a-box 
+            position="0 2 -25" 
+            width="3" 
+            height="4" 
+            depth="0.5"
+            material="color: #4488cc; emissive: #112233; emissiveIntensity: 0.6"
+            onclick="window.location.href='/'"
+            class="clickable"
+            animation="property: material.emissiveIntensity; to: 1.0; dur: 2000; dir: alternate; loop: true">
+            
+            <a-text
+                position="0 0 0.3"
+                text="value: RETURN TO\nGATEWAY; color: #ffffff; align: center; width: 6">
+            </a-text>
+        </a-box>
+
+        <!-- Atmospheric elements -->
+        <a-light type="ambient" color="#001122" intensity="0.2"></a-light>
+        <a-light type="point" position="0 8 0" color="#ff3333" intensity="0.4"></a-light>
+        <a-light type="point" position="15 6 0" color="#0088ff" intensity="0.3"></a-light>
+        <a-light type="point" position="-15 6 0" color="#ff4400" intensity="0.3"></a-light>
+
+        <!-- Floating data streams (visual atmosphere) -->
+        <a-text
+            position="20 8 5"
+            text="value: 01010110110; color: #00ff00; align: center; width: 4"
+            animation="property: position; to: -20 8 5; dur: 15000; loop: true">
+        </a-text>
+        
+        <a-text
+            position="-20 6 -5"
+            text="value: USER_DATA_STREAM; color: #ff4400; align: center; width: 3"
+            animation="property: position; to: 20 6 -5; dur: 12000; loop: true">
+        </a-text>
+
+        <!-- Camera with cursor/raycaster for easy clicking -->
+        <a-entity position="0 1.6 20">
+            <a-camera look-controls="enabled: true" wasd-controls="enabled: true">
+                <!-- Visible crosshair cursor -->
+                <a-cursor
+                    position="0 0 -1"
+                    geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+                    material="color: #00ff88; shader: flat"
+                    animation__mouseenter="property: scale; to: 1.5 1.5 1.5; startEvents: mouseenter; dur: 150"
+                    animation__mouseleave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
+                    animation__click="property: scale; to: 0.8 0.8 0.8; startEvents: click; dur: 100">
+                </a-cursor>
+                
+                <!-- Raycaster for detecting hover/click -->
+                <a-raycaster 
+                    cursor="fuse: false; fuseTimeout: 2000"
+                    raycaster="objects: .clickable, .interactive, .victim;">
+                </a-raycaster>
+            </a-camera>
+        </a-entity>
+    </a-scene>
+    
+    <script>
+        // Game State
+        let gameState = {
+            playerValue: 45.50,
+            manipulationScore: 0,
+            targetsHooked: 0,
+            corruption: 0,
+            focus: 100,
+            privacy: 100,
+            freeWill: 100,
+            mentalHealth: 100,
+            gameStarted: false,
+            currentPhase: 'intro'
+        };
+
+        // Moral dilemmas and consequences
+        const terminalActions = {
+            social: {
+                title: "Social Media Manipulation",
+                description: "Deploy infinite scroll and engagement algorithms",
+                moralPrompt: "This will hook 50,000 teenagers to endless scrolling. Their grades will suffer, but you'll earn $15,000.",
+                consequences: {
+                    playerValue: -5,
+                    corruption: 15,
+                    targetsHooked: 50000,
+                    manipulationScore: 1000
+                },
+                victimImpact: "Teens are now scrolling 3 more hours per day"
+            },
+            data: {
+                title: "Data Harvesting",
+                description: "Sell users' location and browsing data to third parties",
+                moralPrompt: "This violates user privacy and could enable stalking, but it's worth $25,000.",
+                consequences: {
+                    playerValue: -10,
+                    corruption: 25,
+                    privacy: -30,
+                    targetsHooked: 100000,
+                    manipulationScore: 2000
+                },
+                victimImpact: "Users' private data is now sold to 200+ companies"
+            },
+            psych: {
+                title: "Psychological Profiling",
+                description: "Deploy fear-based marketing using psychological vulnerabilities",
+                moralPrompt: "This will exploit people's deepest insecurities and fears for profit. You'll earn $35,000.",
+                consequences: {
+                    playerValue: -15,
+                    corruption: 35,
+                    mentalHealth: -40,
+                    freeWill: -20,
+                    targetsHooked: 200000,
+                    manipulationScore: 3500
+                },
+                victimImpact: "Users are now experiencing increased anxiety and paranoia"
+            },
+            addiction: {
+                title: "Addiction Engineering",
+                description: "Implement variable reward schedules to maximize addiction",
+                moralPrompt: "This will destroy lives and families, but it's the most profitable at $50,000.",
+                consequences: {
+                    playerValue: -20,
+                    corruption: 50,
+                    mentalHealth: -50,
+                    freeWill: -40,
+                    focus: -30,
+                    targetsHooked: 500000,
+                    manipulationScore: 5000
+                },
+                victimImpact: "Severe addiction epidemic: families destroyed, productivity collapsed"
+            }
+        };
+
+        // Victim stories for emotional impact
+        const victimStories = {
+            1: {
+                title: "Sarah, Age 16",
+                story: "Sarah used to get straight A's. After the infinite scroll algorithm you deployed, she scrolls TikTok for 8 hours daily. Her grades have dropped to C's and D's. She can't stop.",
+                effect: "Her future college prospects are ruined."
+            },
+            2: {
+                title: "Michael, Father of 3",
+                story: "Michael's phone addiction (driven by your engagement algorithms) has destroyed family dinners. His wife is considering divorce. His children barely know him.",
+                effect: "A family is breaking apart because of your technology."
+            },
+            3: {
+                title: "Eleanor, Age 72",
+                story: "Eleanor fell for targeted scams enabled by your psychological profiling. She lost her life savings of $85,000. She now lives in poverty.",
+                effect: "An elderly person's security was destroyed for corporate profit."
+            }
+        };
+
+        function startGame() {
+            document.getElementById('story-intro').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            document.getElementById('life-meter').classList.remove('hidden');
+            document.getElementById('action-prompts').classList.remove('hidden');
+            document.getElementById('controls').classList.remove('hidden');
+            document.getElementById('interaction-help').classList.remove('hidden');
+            
+            gameState.gameStarted = true;
+            updateUI();
+            
+            setTimeout(() => {
+                showActionPrompt("Look at the glowing terminals with your green crosshair and click to interact!");
+            }, 2000);
+            
+            // Hide interaction help after 10 seconds
+            setTimeout(() => {
+                document.getElementById('interaction-help').classList.add('hidden');
+            }, 10000);
+        }
+
+        function handleTerminalClick(terminalType) {
+            const action = terminalActions[terminalType];
+            if (!action) return;
+
+            console.log(`Terminal clicked: ${terminalType}`);
+            showActionPrompt(`Loading ${terminalType.toUpperCase()} manipulation tools...`);
+
+            // Show moral dilemma
+            setTimeout(() => {
+                showMoralChoice(action, terminalType);
+            }, 500);
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to terminals
+            const terminals = [
+                { id: 'social-terminal', type: 'social' },
+                { id: 'data-terminal', type: 'data' },
+                { id: 'psych-terminal', type: 'psych' },
+                { id: 'addiction-terminal', type: 'addiction' }
+            ];
+
+            terminals.forEach(terminal => {
+                const element = document.getElementById(terminal.id);
+                if (element) {
+                    element.addEventListener('click', function() {
+                        handleTerminalClick(terminal.type);
+                    });
+                    
+                    // Add hover effects
+                    element.addEventListener('mouseenter', function() {
+                        showActionPrompt(`Click to access ${terminal.type.toUpperCase()} manipulation tools`);
+                        element.setAttribute('animation', 'property: scale; to: 1.1 1.1 1.1; dur: 200');
+                    });
+                    
+                    element.addEventListener('mouseleave', function() {
+                        element.setAttribute('animation', 'property: scale; to: 1 1 1; dur: 200');
+                    });
+                }
+            });
+
+            // Add click handlers to victims
+            for (let i = 1; i <= 3; i++) {
+                const victim = document.getElementById(`victim-${i}`);
+                if (victim) {
+                    victim.addEventListener('click', function() {
+                        examineVictim(i);
+                    });
+                    
+                    victim.addEventListener('mouseenter', function() {
+                        showActionPrompt(`Click to examine this victim of the attention economy`);
+                        victim.setAttribute('animation', 'property: scale; to: 1.1 1.1 1.1; dur: 200');
+                    });
+                    
+                    victim.addEventListener('mouseleave', function() {
+                        victim.setAttribute('animation', 'property: scale; to: 1 1 1; dur: 200');
+                    });
+                }
+            }
+
+            // Add click handler to moral portal
+            const moralPortal = document.getElementById('moral-portal');
+            if (moralPortal) {
+                moralPortal.addEventListener('click', function() {
+                    triggerMoralChoice();
+                });
+                
+                moralPortal.addEventListener('mouseenter', function() {
+                    showActionPrompt(`Click to blow the whistle on the attention economy`);
+                    moralPortal.setAttribute('animation', 'property: scale; to: 1.05 1.05 1.05; dur: 200');
+                });
+                
+                moralPortal.addEventListener('mouseleave', function() {
+                    moralPortal.setAttribute('animation', 'property: scale; to: 1 1 1; dur: 200');
+                });
+            }
+
+            console.log('🎮 Interaction handlers loaded successfully');
+        });
+
+        function showMoralChoice(action, terminalType) {
+            const overlay = document.createElement('div');
+            overlay.className = 'story-overlay';
+            overlay.innerHTML = `
+                <div class="story-text">
+                    <h3>⚖️ Moral Choice: ${action.title}</h3>
+                    <p><strong>The Deal:</strong> ${action.description}</p>
+                    <p><strong>Reality Check:</strong> ${action.moralPrompt}</p>
+                    <p style="color: #ff6666;"><strong>WARNING:</strong> Your actions have real consequences on real people.</p>
+                </div>
+                <div>
+                    <button class="story-button" onclick="executeAction('${terminalType}'); this.parentElement.parentElement.remove();" 
+                            style="background: #ff3333; margin-right: 20px;">
+                        💰 Take the Money
+                    </button>
+                    <button class="story-button" onclick="rejectAction('${terminalType}'); this.parentElement.parentElement.remove();"
+                            style="background: #00ff88;">
+                        🛡️ Refuse
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function executeAction(terminalType) {
+            const action = terminalActions[terminalType];
+            const consequences = action.consequences;
+            
+            // Apply consequences to game state
+            gameState.playerValue += consequences.playerValue || 0;
+            gameState.corruption += consequences.corruption || 0;
+            gameState.targetsHooked += consequences.targetsHooked || 0;
+            gameState.manipulationScore += consequences.manipulationScore || 0;
+            gameState.focus += consequences.focus || 0;
+            gameState.privacy += consequences.privacy || 0;
+            gameState.freeWill += consequences.freeWill || 0;
+            gameState.mentalHealth += consequences.mentalHealth || 0;
+
+            // Ensure values don't go below 0
+            gameState.focus = Math.max(0, gameState.focus);
+            gameState.privacy = Math.max(0, gameState.privacy);
+            gameState.freeWill = Math.max(0, gameState.freeWill);
+            gameState.mentalHealth = Math.max(0, gameState.mentalHealth);
+
+            updateUI();
+            
+            // Show immediate consequences
+            setTimeout(() => {
+                showActionPrompt(`💰 Trade executed! ${action.victimImpact}. Your soul is a little darker.`);
+            }, 1000);
+
+            // Remove the terminal to show it's been used
+            const terminal = document.getElementById(terminalType + '-terminal');
+            if (terminal) {
+                terminal.setAttribute('material', 'color: #333333; emissive: #111111; emissiveIntensity: 0.1');
+                terminal.classList.remove('clickable');
+            }
+
+            // Check for game progression
+            checkGameProgression();
+        }
+
+        function rejectAction(terminalType) {
+            // Small positive impact for rejecting evil
+            gameState.corruption = Math.max(0, gameState.corruption - 5);
+            updateUI();
+            
+            showActionPrompt("You refused the deal. Your conscience is cleaner, but the system remains.");
+            
+            // Remove the terminal
+            const terminal = document.getElementById(terminalType + '-terminal');
+            if (terminal) {
+                terminal.setAttribute('material', 'color: #004422; emissive: #002211; emissiveIntensity: 0.3');
+                terminal.classList.remove('clickable');
+            }
+
+            checkGameProgression();
+        }
+
+        function examineVictim(victimId) {
+            const victim = victimStories[victimId];
+            if (!victim) return;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'story-overlay';
+            overlay.innerHTML = `
+                <div class="story-text">
+                    <h3>😢 ${victim.title}</h3>
+                    <p>${victim.story}</p>
+                    <p style="color: #ff6666;"><strong>${victim.effect}</strong></p>
+                    <p style="color: #888888;">This is the human cost of the attention economy.</p>
+                </div>
+                <button class="story-button" onclick="this.parentElement.remove();">
+                    Continue
+                </button>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function triggerMoralChoice() {
+            if (gameState.corruption < 50) {
+                showActionPrompt("You need more corruption to access the whistleblower option. Make more immoral trades first.");
+                return;
+            }
+
+            const overlay = document.createElement('div');
+            overlay.className = 'story-overlay';
+            overlay.innerHTML = `
+                <div class="story-text">
+                    <h2>🔥 The Whistleblower's Choice</h2>
+                    <p>You've seen enough. The attention economy is destroying humanity.</p>
+                    <p>You can expose the entire system, but you'll lose everything.</p>
+                    <p><strong>Targets you've helped hook:</strong> ${gameState.targetsHooked.toLocaleString()} people</p>
+                    <p><strong>Your corruption level:</strong> ${gameState.corruption}%</p>
+                    <p>Will you blow the whistle and save humanity?</p>
+                </div>
+                <div>
+                    <button class="story-button" onclick="endGameHero(); this.parentElement.parentElement.remove();" 
+                            style="background: #00ff88; margin-right: 20px;">
+                        🦸 Expose the Truth
+                    </button>
+                    <button class="story-button" onclick="endGameVillain(); this.parentElement.parentElement.remove();"
+                            style="background: #ff3333;">
+                        💰 Keep the Money
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function endGameHero() {
+            const overlay = document.createElement('div');
+            overlay.className = 'story-overlay';
+            overlay.innerHTML = `
+                <div class="story-text">
+                    <h2>🏆 Hero Ending: The Whistleblower</h2>
+                    <p>You leaked internal documents exposing how tech companies manipulate human psychology.</p>
+                    <p>The resulting scandal led to:</p>
+                    <ul style="text-align: left; max-width: 500px;">
+                        <li>📱 New digital rights legislation</li>
+                        <li>🧠 Mandatory mental health warnings on apps</li>
+                        <li>👨‍👩‍👧‍👦 Families reconnecting without digital addiction</li>
+                        <li>🎓 Educational programs about manipulation</li>
+                        <li>⚖️ Heavy fines for attention exploitation</li>
+                    </ul>
+                    <p><strong>You lost your job but saved humanity's attention.</strong></p>
+                    <p style="color: #00ff88;">The real world needs more whistleblowers like you.</p>
+                </div>
+                <div>
+                    <button class="story-button" onclick="window.location.href='/';">
+                        Return to Gateway
+                    </button>
+                    <button class="story-button" onclick="location.reload();" style="background: #4488cc; margin-left: 20px;">
+                        Play Again
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function endGameVillain() {
+            const overlay = document.createElement('div');
+            overlay.className = 'story-overlay';
+            overlay.innerHTML = `
+                <div class="story-text">
+                    <h2>💀 Villain Ending: The Corrupted Broker</h2>
+                    <p>You chose profit over people. The attention economy consumes everything.</p>
+                    <p>Your legacy:</p>
+                    <ul style="text-align: left; max-width: 500px;">
+                        <li>📉 Human attention spans dropped 60%</li>
+                        <li>😱 Mental health crisis worsened</li>
+                        <li>👨‍👩‍👧‍👦 Families destroyed by digital addiction</li>
+                        <li>🎓 Education system collapsed from lack of focus</li>
+                        <li>🗳️ Democracy failed due to manipulation</li>
+                    </ul>
+                    <p><strong>You're rich, but humanity is broken.</strong></p>
+                    <p style="color: #ff3333;">In the real world, this is happening right now.</p>
+                </div>
+                <div>
+                    <button class="story-button" onclick="window.location.href='/';">
+                        Return to Gateway
+                    </button>
+                    <button class="story-button" onclick="location.reload();" style="background: #4488cc; margin-left: 20px;">
+                        Try to Be Better
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function checkGameProgression() {
+            // Count used terminals
+            const usedTerminals = document.querySelectorAll('.interactive').length - 
+                                 document.querySelectorAll('.interactive.clickable').length;
+            
+            if (usedTerminals >= 2 && gameState.corruption >= 30) {
+                setTimeout(() => {
+                    showActionPrompt("The moral choice portal is now active. You've seen the system's true cost.");
+                }, 3000);
+            }
+
+            // Gradual degradation of player stats
+            if (gameState.corruption > 70) {
+                gameState.focus = Math.max(0, gameState.focus - 1);
+                gameState.mentalHealth = Math.max(0, gameState.mentalHealth - 2);
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            // Update player value (decreases as corruption increases)
+            document.getElementById('player-value').textContent = `${gameState.playerValue.toFixed(2)}/hr`;
+            
+            // Update manipulation metrics
+            document.getElementById('manipulation-score').textContent = gameState.manipulationScore.toLocaleString();
+            document.getElementById('targets-hooked').textContent = gameState.targetsHooked.toLocaleString();
+            
+            // Update corruption bar
+            const corruptionBar = document.getElementById('corruption-bar');
+            corruptionBar.style.width = Math.min(100, gameState.corruption) + '%';
+            
+            // Update life metrics
+            document.getElementById('focus-level').textContent = gameState.focus + '%';
+            document.getElementById('privacy-level').textContent = gameState.privacy + '%';
+            document.getElementById('freewill-level').textContent = gameState.freeWill + '%';
+            document.getElementById('mental-health').textContent = gameState.mentalHealth + '%';
+
+            // Change colors based on health
+            updateHealthColors();
+        }
+
+        function updateHealthColors() {
+            const metrics = ['focus-level', 'privacy-level', 'freewill-level', 'mental-health'];
+            const values = [gameState.focus, gameState.privacy, gameState.freeWill, gameState.mentalHealth];
+            
+            metrics.forEach((id, index) => {
+                const element = document.getElementById(id);
+                const value = values[index];
+                
+                if (value > 70) {
+                    element.style.color = '#00ff88';
+                } else if (value > 30) {
+                    element.style.color = '#ffaa00';
+                } else {
+                    element.style.color = '#ff3333';
+                }
+            });
+        }
+
+        function showActionPrompt(message) {
+            const promptElement = document.getElementById('current-action');
+            if (promptElement) {
+                promptElement.textContent = message;
+                
+                // Flash effect
+                promptElement.style.background = 'rgba(0,255,136,0.3)';
+                setTimeout(() => {
+                    promptElement.style.background = 'rgba(0,0,0,0.9)';
+                }, 2000);
+            }
+        }
+
+        // Dynamic environmental effects
+        function createDataStream() {
+            const scene = document.querySelector('a-scene');
+            const stream = document.createElement('a-text');
+            
+            const messages = [
+                'HARVESTING_USER_DATA...',
+                'DEPLOYING_DOPAMINE_HOOKS...',
+                'ANALYZING_EMOTIONAL_STATE...',
+                'TARGETING_VULNERABILITIES...',
+                'MAXIMIZING_ENGAGEMENT...',
+                'ADDICTION_PROTOCOLS_ACTIVE...',
+                'PRIVACY_VIOLATION_IN_PROGRESS...',
+                'PSYCHOLOGICAL_MANIPULATION_ONLINE...'
+            ];
+            
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            const startX = Math.random() > 0.5 ? 25 : -25;
+            const endX = startX * -1;
+            const y = 5 + Math.random() * 5;
+            const z = (Math.random() - 0.5) * 30;
+            
+            stream.setAttribute('position', `${startX} ${y} ${z}`);
+            stream.setAttribute('text', `value: ${message}; color: #ff4400; align: center; width: 3`);
+            stream.setAttribute('animation', `property: position; to: ${endX} ${y} ${z}; dur: ${8000 + Math.random() * 4000}; loop: false`);
+            
+            scene.appendChild(stream);
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (stream.parentNode) {
+                    stream.parentNode.removeChild(stream);
+                }
+            }, 12000);
+        }
+
+        // Money rain effect when making evil choices
+        function createMoneyRain() {
+            const scene = document.querySelector('a-scene');
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const money = document.createElement('a-text');
+                    const x = (Math.random() - 0.5) * 40;
+                    const z = (Math.random() - 0.5) * 40;
+                    
+                    money.setAttribute('position', `${x} 15 ${z}`);
+                    money.setAttribute('text', 'value: $$; color: #00ff00; align: center; width: 8');
+                    money.setAttribute('animation', `property: position; to: ${x} 0 ${z}; dur: 3000; loop: false`);
+                    money.setAttribute('animation__rotate', 'property: rotation; to: 0 360 0; dur: 3000; loop: false');
+                    
+                    scene.appendChild(money);
+                    
+                    setTimeout(() => {
+                        if (money.parentNode) {
+                            money.parentNode.removeChild(money);
+                        }
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+
+        // Corruption visual effects
+        function updateCorruptionEffects() {
+            const scene = document.querySelector('a-scene');
+            const corruption = gameState.corruption;
+            
+            if (corruption > 50) {
+                // Darken the environment
+                scene.setAttribute('background', 'color: #000000');
+                scene.setAttribute('fog', 'type: exponential; color: #000000; density: 0.005');
+            }
+            
+            if (corruption > 70) {
+                // Add menacing red glow
+                const lights = scene.querySelectorAll('[light]');
+                lights.forEach(light => {
+                    if (light.getAttribute('light').color !== '#ff0000') {
+                        light.setAttribute('light', 'color: #ff0000; intensity: 0.8');
+                    }
+                });
+            }
+        }
+
+        // Victim suffering indicators
+        function updateVictimStates() {
+            const victims = ['victim-1', 'victim-2', 'victim-3'];
+            const corruption = gameState.corruption;
+            
+            victims.forEach(victimId => {
+                const victim = document.getElementById(victimId);
+                if (victim && corruption > 30) {
+                    // Make victims pulse red more frantically
+                    victim.setAttribute('animation', 
+                        'property: material.emissiveIntensity; to: 1.0; dur: 500; dir: alternate; loop: true');
+                    
+                    if (corruption > 60) {
+                        // Add suffering animation
+                        victim.setAttribute('animation__shake', 
+                            'property: rotation; to: 2 0 2; dur: 200; dir: alternate; loop: true');
+                    }
+                }
+            });
+        }
+
+        // Start environmental effects
+        function startEnvironmentalEffects() {
+            // Data streams every 3-8 seconds
+            setInterval(() => {
+                if (gameState.gameStarted && Math.random() < 0.7) {
+                    createDataStream();
+                }
+            }, 3000 + Math.random() * 5000);
+
+            // Update corruption effects every 5 seconds
+            setInterval(() => {
+                if (gameState.gameStarted) {
+                    updateCorruptionEffects();
+                    updateVictimStates();
+                }
+            }, 5000);
+        }
+
+        // ESC key for quick menu
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && gameState.gameStarted) {
+                const overlay = document.createElement('div');
+                overlay.className = 'story-overlay';
+                overlay.innerHTML = `
+                    <div class="story-text">
+                        <h3>⏸️ Game Menu</h3>
+                        <p>Current Corruption: ${gameState.corruption}%</p>
+                        <p>Targets Hooked: ${gameState.targetsHooked.toLocaleString()}</p>
+                        <p>What would you like to do?</p>
+                    </div>
+                    <div>
+                        <button class="story-button" onclick="this.parentElement.parentElement.remove();">
+                            Continue Playing
+                        </button>
+                        <button class="story-button" onclick="location.reload();" style="background: #ffaa00; margin: 0 10px;">
+                            Restart Game
+                        </button>
+                        <button class="story-button" onclick="window.location.href='/';" style="background: #ff3333;">
+                            Exit to Gateway
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+        });
+
+        // Initialize
+        console.log('🎭 The Attention Economy Exchange - Interactive Experience Loaded');
+        console.log('This is not just a simulation. This is happening right now.');
+        
+        // Start effects when game begins
+        startEnvironmentalEffects();
+        
+        // Initial UI update
+        updateUI();
+    </script>
+</body>
+</html>
