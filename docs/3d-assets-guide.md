@@ -2,7 +2,67 @@
 
 ## 🎯 Overview
 
-This guide covers how to use 3D models (GLB/GLTF files) in the Signpost Observatory project. The system supports building models, props, environment objects, and interactive elements.
+This guide covers how to use 3D models (GLB/GLTF files) in the Signpost Observatory project. The system supports building models, props, environment objects, and interactive elements. We use AI-powered 3D generation tools to create custom assets for the project.
+
+## 🤖 AI-Powered 3D Generation Sources
+
+### Primary Generation Tools
+
+#### 1. **Shap-E** - Text-to-3D Generation
+- **Source**: [Hugging Face Space](https://huggingface.co/spaces/hysts/Shap-E)
+- **Use Case**: Generate 3D models from text descriptions
+- **Best For**: Props, environmental objects, abstract shapes
+- **Workflow**:
+  1. Visit the Shap-E space
+  2. Enter text description (e.g., "a futuristic observatory building")
+  3. Generate and download the GLB file
+  4. Optimize for web use (reduce polygons, compress textures)
+  5. Add to project assets
+
+#### 2. **Hunyuan3D-2** - Advanced 3D Asset Generation
+- **Source**: [Hugging Face Model](https://huggingface.co/tencent/Hunyuan3D-2)
+- **Use Case**: High-quality textured 3D assets from images or text
+- **Best For**: Buildings, complex structures, detailed props
+- **Features**:
+  - Two-stage generation (shape + texture)
+  - High-resolution textured outputs
+  - Image-to-3D and text-to-3D capabilities
+  - Professional-grade quality
+- **Workflow**:
+  1. Use the Hunyuan3D-2 model via API or Gradio app
+  2. Generate mesh from text or image input
+  3. Apply texture synthesis for realistic appearance
+  4. Export as GLB format
+  5. Optimize for web performance
+
+### Generation Workflow
+
+```bash
+# 1. Generate with Shap-E (for props/environment)
+# Visit: https://huggingface.co/spaces/hysts/Shap-E
+# Input: "a giant cat statue"
+# Download: cat.glb
+
+# 2. Generate with Hunyuan3D-2 (for buildings)
+# Visit: https://huggingface.co/tencent/Hunyuan3D-2
+# Input: "futuristic observatory building"
+# Download: observatory.glb
+
+# 3. Add to project
+cp generated-model.glb public/assets/models/buildings/
+cp generated-prop.glb public/assets/models/props/
+```
+
+### Optimization After Generation
+
+```javascript
+// AI-generated models often need optimization
+// 1. Reduce polygon count (target: <10k for buildings, <5k for props)
+// 2. Compress textures (1024x1024 max for props, 2048x2048 for buildings)
+// 3. Center at origin (0,0,0)
+// 4. Add collision geometry if needed
+// 5. Test in browser for performance
+```
 
 ## 📁 Asset Directory Structure
 
@@ -230,7 +290,37 @@ building-component="interactive: true; clickable: true; hoverable: true"
 // Add physics body if needed
 ```
 
-### Debug Tools
+##### Shap-E Models
+- **Black/Invisible Models**: Check materials and lighting
+  ```javascript
+  // Add ambient lighting for Shap-E models
+  <a-light type="ambient" intensity="0.6"></a-light>
+  ```
+
+- **Poor Textures**: Shap-E models may have basic materials
+  ```javascript
+  // Add material component for better appearance
+  material="shader: standard; metalness: 0.8; roughness: 0.2"
+  ```
+
+##### Hunyuan3D-2 Models
+- **High Polygon Count**: May need optimization
+  ```javascript
+  // Monitor performance in browser dev tools
+  // Consider reducing polygon count in 3D software
+  ```
+- **Large File Size**: Compress textures and optimize
+  ```javascript
+  // Use texture compression tools
+  // Reduce texture resolution if needed
+  ```
+- **Complex Materials**: May not render properly in A-Frame
+  ```javascript
+  // Simplify materials for web compatibility
+  material="shader: flat; color: #ffffff"
+  ```
+
+### Current Project Assets
 
 ```javascript
 // Debug asset manager
