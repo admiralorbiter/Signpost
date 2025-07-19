@@ -1,0 +1,147 @@
+"""
+Portal Configuration for Signpost Observatory
+Easy way to add new portals and manage existing ones
+"""
+
+# Portal Configuration
+PORTAL_CONFIG = {
+    # Education Portal
+    'education': {
+        'id': 'education',
+        'title': 'AI & Education',
+        'description': 'Interactive Learning Futures',
+        'position': {'x': 5, 'y': 1, 'z': 5},
+        'color': '#00aa66',
+        'status': 'development',
+        'project_data': {
+            'title': 'AI & Education Portal',
+            'description': 'Future: Interactive AI tutoring systems, virtual classrooms with adaptive learning environments, and tools for addressing the education pipeline collapse.',
+            'features': ['Adaptive Learning', 'Virtual Classrooms', 'AI Tutoring', 'Personalized Learning Paths'],
+            'status': 'coming-soon',
+            'eta': 'Q2 2024',
+            'progress': 25
+        }
+    },
+    
+    # Democracy Portal
+    'democracy': {
+        'id': 'democracy',
+        'title': 'Democracy & Technology',
+        'description': 'Critical Analysis',
+        'position': {'x': -5, 'y': 1, 'z': 5},
+        'color': '#aa0066',
+        'status': 'development',
+        'project_data': {
+            'title': 'Democracy & Technology Portal',
+            'description': 'Future: Simulations of democratic processes, visualization of political data, and interactive explorations of the threats to democratic norms.',
+            'features': ['Democratic Simulations', 'Political Data Viz', 'Norm Analysis', 'Civic Engagement Tools'],
+            'status': 'coming-soon',
+            'eta': 'Q3 2024',
+            'progress': 15
+        }
+    },
+    
+    # Connection Portal
+    'connection': {
+        'id': 'connection',
+        'title': 'Human Connection',
+        'description': 'Empathy & AI Philosophical Inquiry',
+        'position': {'x': 0, 'y': 1, 'z': 8},
+        'color': '#0066aa',
+        'status': 'development',
+        'project_data': {
+            'title': 'Human Connection Portal',
+            'description': 'Future: VR experiences exploring human-AI empathy, virtual therapy environments, and philosophical spaces for contemplating consciousness.',
+            'features': ['Empathy Training', 'Virtual Therapy', 'Philosophical Spaces', 'Social VR'],
+            'status': 'coming-soon',
+            'eta': 'Q4 2024',
+            'progress': 10
+        }
+    },
+    
+    # Analysis Portal
+    'analysis': {
+        'id': 'analysis',
+        'title': 'Data Visualization',
+        'description': 'Crime Analytics Urban Studies',
+        'position': {'x': -5, 'y': 1, 'z': -3},
+        'color': '#aa6600',
+        'status': 'development',
+        'project_data': {
+            'title': 'Data & Analysis Portal',
+            'description': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.',
+            'features': ['3D Data Viz', 'Crime Mapping', 'Urban Planning', 'Real-time Analytics'],
+            'status': 'coming-soon',
+            'eta': 'Q1 2025',
+            'progress': 5
+        }
+    }
+}
+
+# Template for adding new portals
+NEW_PORTAL_TEMPLATE = {
+    'id': 'new-portal-id',
+    'title': 'New Portal Title',
+    'description': 'Brief description',
+    'position': {'x': 0, 'y': 1, 'z': 0},  # Adjust position as needed
+    'color': '#4488cc',  # Choose a unique color
+    'status': 'development',
+    'project_data': {
+        'title': 'New Portal Full Title',
+        'description': 'Detailed description of what this portal will contain...',
+        'features': ['Feature 1', 'Feature 2', 'Feature 3'],
+        'status': 'coming-soon',  # Options: coming-soon, in-development, ready, live
+        'eta': 'Q2 2024',  # Estimated time of arrival
+        'progress': 0  # Development progress (0-100)
+    }
+}
+
+def get_portals_list():
+    """Get list of portals for API"""
+    return [portal for portal in PORTAL_CONFIG.values()]
+
+def get_projects_dict():
+    """Get projects dictionary for API"""
+    return {portal_id: portal['project_data'] for portal_id, portal in PORTAL_CONFIG.items()}
+
+def add_new_portal(portal_id, portal_config):
+    """Add a new portal to the configuration"""
+    PORTAL_CONFIG[portal_id] = portal_config
+    return True
+
+def remove_portal(portal_id):
+    """Remove a portal from the configuration"""
+    if portal_id in PORTAL_CONFIG:
+        del PORTAL_CONFIG[portal_id]
+        return True
+    return False
+
+def update_portal_status(portal_id, status):
+    """Update portal status"""
+    if portal_id in PORTAL_CONFIG:
+        PORTAL_CONFIG[portal_id]['status'] = status
+        PORTAL_CONFIG[portal_id]['project_data']['status'] = status
+        return True
+    return False
+
+# Example of how to add a new portal
+def add_example_portal():
+    """Example of adding a new portal"""
+    new_portal = {
+        'id': 'gaming',
+        'title': 'Gaming & Entertainment',
+        'description': 'Interactive Gaming Experiences',
+        'position': {'x': 8, 'y': 1, 'z': -5},
+        'color': '#cc4488',
+        'status': 'development',
+        'project_data': {
+            'title': 'Gaming & Entertainment Portal',
+            'description': 'Future: Immersive gaming experiences, virtual arcades, and interactive entertainment spaces.',
+            'features': ['VR Gaming', 'Virtual Arcades', 'Social Gaming', 'Interactive Stories'],
+            'status': 'coming-soon',
+            'eta': 'Q2 2025',
+            'progress': 0
+        }
+    }
+    add_new_portal('gaming', new_portal)
+    return new_portal 

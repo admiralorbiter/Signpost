@@ -239,9 +239,12 @@
     </a-scene>
 
     <script>
-        // Portal interaction system
+        // Portal interaction system with backend integration
         document.addEventListener('DOMContentLoaded', function() {
             const portals = document.querySelectorAll('.portal');
+            
+            // Load portal data from backend
+            loadPortalData();
             
             portals.forEach(portal => {
                 portal.addEventListener('click', function() {
@@ -260,18 +263,184 @@
             });
         });
         
-        function handlePortalClick(project) {
+        async function loadPortalData() {
+            try {
+                const response = await fetch('/api/portals');
+                const portals = await response.json();
+                console.log('Loaded portal data:', portals);
+            } catch (error) {
+                console.error('Error loading portal data:', error);
+            }
+        }
+        
+        async function handlePortalClick(project) {
             console.log(`Entering ${project} project`);
             
-            // For now, show what each portal would lead to
-            const descriptions = {
-                'education': 'Future: Interactive AI tutoring systems, virtual classrooms with adaptive learning environments, and tools for addressing the education pipeline collapse you\'ve written about.',
-                'democracy': 'Future: Simulations of democratic processes, visualization of political data, and interactive explorations of the threats to democratic norms.',
-                'connection': 'Future: VR experiences exploring human-AI empathy, virtual therapy environments, and philosophical spaces for contemplating consciousness.',
-                'analysis': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.'
-            };
+            try {
+                const response = await fetch(`/api/projects/${project}`);
+                const projectData = await response.json();
+                
+                showProjectModal(projectData);
+            } catch (error) {
+                console.error('Error loading project data:', error);
+                // Fallback to static descriptions
+                const descriptions = {
+                    'education': 'Future: Interactive AI tutoring systems, virtual classrooms with adaptive learning environments, and tools for addressing the education pipeline collapse.',
+                    'democracy': 'Future: Simulations of democratic processes, visualization of political data, and interactive explorations of the threats to democratic norms.',
+                    'connection': 'Future: VR experiences exploring human-AI empathy, virtual therapy environments, and philosophical spaces for contemplating consciousness.',
+                    'analysis': 'Future: 3D data visualization spaces, crime mapping interfaces, and interactive urban planning tools based on your analytical work.'
+                };
+                
+                showProjectModal({
+                    title: `${project.toUpperCase()} Portal`,
+                    description: descriptions[project] || 'Project details coming soon...',
+                    status: 'in-development'
+                });
+            }
+        }
+        
+        function showProjectModal(projectData) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+                backdrop-filter: blur(10px);
+            `;
             
-            alert(`Portal: ${project.toUpperCase()}\n\n${descriptions[project]}\n\nThis portal will be developed as part of your VR project collection.`);
+            const isComingSoon = projectData.status === 'coming-soon' || projectData.status === 'in-development';
+            const statusColor = isComingSoon ? '#ffaa00' : '#00ffaa';
+            const statusIcon = isComingSoon ? '⏳' : '🚀';
+            
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #001122 0%, #003366 100%);
+                    color: white;
+                    padding: 40px;
+                    border-radius: 20px;
+                    max-width: 600px;
+                    text-align: center;
+                    border: 3px solid ${statusColor};
+                    box-shadow: 0 0 40px rgba(0,255,170,0.4);
+                    animation: modalPulse 2s ease-in-out infinite alternate;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 20px;">${statusIcon}</div>
+                    <h2 style="color: ${statusColor}; margin-bottom: 20px; font-size: 28px;">${projectData.title}</h2>
+                    
+                    ${isComingSoon ? `
+                        <div style="
+                            background: rgba(255,170,0,0.1);
+                            border: 1px solid #ffaa00;
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin: 20px 0;
+                        ">
+                            <h3 style="color: #ffaa00; margin-bottom: 15px; font-size: 24px;">🚧 Coming Soon 🚧</h3>
+                            <p style="color: #ffcc66; font-size: 16px; line-height: 1.6;">
+                                This immersive VR experience is currently under development. 
+                                We're crafting something extraordinary for you.
+                            </p>
+                        </div>
+                    ` : ''}
+                    
+                    <p style="line-height: 1.8; margin-bottom: 25px; font-size: 16px; color: #e0e0e0;">
+                        ${projectData.description}
+                    </p>
+                    
+                    ${projectData.features ? `
+                        <div style="margin-bottom: 25px;">
+                            <h4 style="color: #4488cc; margin-bottom: 15px;">✨ Planned Features:</h4>
+                            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+                                ${projectData.features.map(feature => `
+                                    <span style="
+                                        background: rgba(68,136,204,0.2);
+                                        border: 1px solid #4488cc;
+                                        border-radius: 20px;
+                                        padding: 8px 16px;
+                                        font-size: 14px;
+                                        color: #66aacc;
+                                    ">${feature}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="
+                        background: rgba(0,0,0,0.3);
+                        border-radius: 10px;
+                        padding: 15px;
+                        margin-bottom: 25px;
+                    ">
+                        <p style="color: ${statusColor}; font-style: italic; margin: 0;">
+                            Status: ${projectData.status.replace('-', ' ').toUpperCase()}
+                        </p>
+                        ${projectData.eta ? `<p style="color: #888; font-size: 14px; margin: 5px 0 0 0;">ETA: ${projectData.eta}</p>` : ''}
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                            padding: 15px 30px;
+                            background: ${statusColor};
+                            border: none;
+                            border-radius: 10px;
+                            color: #001122;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            font-size: 16px;
+                        " onmouseover="this.style.background='#00cc88'" onmouseout="this.style.background='${statusColor}'">
+                            Continue Exploring
+                        </button>
+                        
+                        ${isComingSoon ? `
+                            <button onclick="notifyWhenReady('${projectData.id}')" style="
+                                padding: 15px 30px;
+                                background: transparent;
+                                border: 2px solid ${statusColor};
+                                border-radius: 10px;
+                                color: ${statusColor};
+                                font-weight: bold;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                font-size: 16px;
+                            " onmouseover="this.style.background='rgba(255,170,0,0.1)'" onmouseout="this.style.background='transparent'">
+                                Notify When Ready
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes modalPulse {
+                    0% { box-shadow: 0 0 40px rgba(0,255,170,0.4); }
+                    100% { box-shadow: 0 0 60px rgba(0,255,170,0.6); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(modal);
+            
+            // Auto-remove after 15 seconds
+            setTimeout(() => {
+                if (modal.parentElement) {
+                    modal.remove();
+                }
+            }, 15000);
+        }
+        
+        function notifyWhenReady(projectId) {
+            // Placeholder for notification system
+            alert(`You'll be notified when ${projectId} is ready!`);
         }
         
         // Dynamic atmosphere
