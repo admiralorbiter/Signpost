@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signpost Engine Test</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-system@1.4.0/dist/aframe-physics-system.min.js"></script>
+    
+    <!-- Engine Components -->
+    <script src="../shared/components/engine.js"></script>
+    <script src="../shared/components/component-system.js"></script>
+    <script src="../shared/components/state-manager.js"></script>
+    
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .test-controls {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        
+        .test-controls button {
+            margin: 5px;
+            padding: 8px 12px;
+            background: #4CC3D9;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .test-controls button:hover {
+            background: #3BA8C0;
+        }
+    </style>
+</head>
+<body>
+    <a-scene physics="gravity: -9.8">
+        <!-- Camera -->
+        <a-camera position="0 1.6 0" look-controls wasd-controls>
+            <a-cursor></a-cursor>
+        </a-camera>
+        
+        <!-- Test Objects -->
+        <a-box position="-2 1 0" 
+               grabbable 
+               clickable 
+               haptic-feedback
+               color="#4CC3D9">
+        </a-box>
+        
+        <a-sphere position="2 1 0" 
+                  grabbable 
+                  clickable 
+                  haptic-feedback
+                  color="#EF2D5E">
+        </a-sphere>
+        
+        <a-cylinder position="0 1 -2" 
+                    grabbable 
+                    clickable 
+                    haptic-feedback
+                    color="#FFC65D">
+        </a-cylinder>
+        
+        <!-- Ground -->
+        <a-plane position="0 0 0" 
+                 rotation="-90 0 0" 
+                 width="10" 
+                 height="10" 
+                 color="#7BC8A4">
+        </a-plane>
+        
+        <!-- Lighting -->
+        <a-light type="ambient" color="#888888"></a-light>
+        <a-light type="directional" position="0 5 5" color="#ffffff"></a-light>
+    </a-scene>
+    
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debug-panel">
+        <h3>Engine Debug</h3>
+        <div id="engine-stats"></div>
+        <div id="state-info"></div>
+    </div>
+    
+    <!-- Test Controls -->
+    <div class="test-controls">
+        <h3>Test Controls</h3>
+        <button onclick="testEngine()">Test Engine</button>
+        <button onclick="testComponents()">Test Components</button>
+        <button onclick="testState()">Test State</button>
+        <button onclick="debugAll()">Debug All</button>
+        <button onclick="resetState()">Reset State</button>
+    </div>
+    
+    <script>
+        // Test functions
+        function testEngine() {
+            if (window.engine) {
+                console.log('✅ Engine test passed');
+                window.engine.debug();
+            } else {
+                console.error('❌ Engine not found');
+            }
+        }
+        
+        function testComponents() {
+            const scene = document.querySelector('a-scene');
+            const grabbable = scene.querySelector('[grabbable]');
+            const clickable = scene.querySelector('[clickable]');
+            
+            if (grabbable && clickable) {
+                console.log('✅ Components test passed');
+                console.log('Grabbable components:', scene.querySelectorAll('[grabbable]').length);
+                console.log('Clickable components:', scene.querySelectorAll('[clickable]').length);
+            } else {
+                console.error('❌ Components not found');
+            }
+        }
+        
+        function testState() {
+            if (window.stateManager) {
+                console.log('✅ State manager test passed');
+                window.stateManager.debug();
+            } else {
+                console.error('❌ State manager not found');
+            }
+        }
+        
+        function debugAll() {
+            testEngine();
+            testComponents();
+            testState();
+        }
+        
+        function resetState() {
+            if (window.stateManager) {
+                window.stateManager.reset();
+                console.log('🔄 State reset');
+            }
+        }
+        
+        // Update debug panel
+        function updateDebugPanel() {
+            const statsDiv = document.getElementById('engine-stats');
+            const stateDiv = document.getElementById('state-info');
+            
+            if (window.engine && statsDiv) {
+                const perf = window.engine.state.performance;
+                statsDiv.innerHTML = `
+                    <strong>Performance:</strong><br>
+                    FPS: ${perf.fps}<br>
+                    Draw Calls: ${perf.drawCalls}<br>
+                    Memory: ${perf.memoryUsage}<br>
+                    VR Mode: ${window.engine.state.user.vrMode ? 'Yes' : 'No'}
+                `;
+            }
+            
+            if (window.stateManager && stateDiv) {
+                const user = window.stateManager.get('user');
+                const scene = window.stateManager.get('scene');
+                stateDiv.innerHTML = `
+                    <strong>State:</strong><br>
+                    User: ${user.name}<br>
+                    Level: ${scene.currentLevel || 'None'}<br>
+                    Entities: ${scene.entities.length}<br>
+                    Notifications: ${window.stateManager.get('app.notifications').length}
+                `;
+            }
+        }
+        
+        // Update debug panel every second
+        setInterval(updateDebugPanel, 1000);
+        
+        // Initialize when scene is loaded
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            console.log('🎮 Test scene loaded');
+            
+            // Auto-run tests
+            setTimeout(() => {
+                console.log('🧪 Running automatic tests...');
+                debugAll();
+            }, 2000);
+        });
+        
+        // Test component interactions
+        document.addEventListener('clickable-clicked', (event) => {
+            console.log('🎯 Clickable clicked:', event.detail);
+        });
+        
+        document.addEventListener('grabbable-grabbed', (event) => {
+            console.log('✋ Grabbable grabbed:', event.detail);
+        });
+        
+        document.addEventListener('grabbable-released', (event) => {
+            console.log('👋 Grabbable released:', event.detail);
+        });
+        
+        console.log('🚀 Test page initialized');
+    </script>
+</body>
+</html> 
