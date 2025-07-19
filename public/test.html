@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Signpost Test - A-Frame</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.0/aframe.min.js"></script>
+    <style>
+        body { margin: 0; background: #000; }
+        .ui-overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui-overlay">
+        <h3>Signpost Test</h3>
+        <p>If you can see a red cube, A-Frame is working!</p>
+    </div>
+
+    <a-scene background="color: #001122">
+        <!-- Simple test cube -->
+        <a-box position="0 1 -3" color="red" rotation="0 45 0"></a-box>
+        
+        <!-- Camera -->
+        <a-camera position="0 1.6 0"></a-camera>
+    </a-scene>
+
+    <script>
+        console.log('Test: Script loading...');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test: DOM loaded');
+            
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                scene.addEventListener('loaded', function() {
+                    console.log('Test: A-Frame scene loaded successfully');
+                    document.querySelector('.ui-overlay').innerHTML += '<p style="color: green;">✅ A-Frame is working!</p>';
+                });
+                
+                scene.addEventListener('error', function(error) {
+                    console.error('Test: A-Frame scene error:', error);
+                    document.querySelector('.ui-overlay').innerHTML += '<p style="color: red;">❌ A-Frame error!</p>';
+                });
+            } else {
+                console.error('Test: No a-scene found!');
+                document.querySelector('.ui-overlay').innerHTML += '<p style="color: red;">❌ No a-scene found!</p>';
+            }
+        });
+    </script>
+</body>
+</html> 

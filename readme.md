@@ -106,12 +106,6 @@ Signpost/
 - Crime mapping interfaces
 - Interactive urban planning tools
 
-#### 🏛️ Democracy Portal
-**Future VR Experiences:**
-- Democratic process simulations
-- Political data visualizations
-- Interactive explorations of democratic norms
-
 ## 🛠️ Technical Stack
 
 ### Frontend

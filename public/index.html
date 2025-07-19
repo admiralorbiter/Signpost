@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <title>The Signpost Observatory - VR Gateway</title>
     <meta name="description" content="A VR gateway to explore ideas, education, and the future">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.0/aframe.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.0/aframe.min.js.map"></script>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <style>
         body {
             font-family: 'Georgia', serif;
@@ -55,13 +54,37 @@
     <div class="controls">
         <p>WASD to move • Mouse to look • Click on glowing portals to enter projects</p>
     </div>
+    
+    <div id="fallback-message" style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        background: rgba(0,0,0,0.8);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        display: none;
+        z-index: 2000;
+    ">
+        <h3>Loading VR Environment...</h3>
+        <p>If you don't see the 3D environment, please check:</p>
+        <ul style="text-align: left;">
+            <li>Your browser supports WebGL</li>
+            <li>JavaScript is enabled</li>
+            <li>You're using a modern browser (Chrome/Firefox)</li>
+        </ul>
+        <p><small>Check browser console for errors</small></p>
+    </div>
 
     <a-scene 
         vr-mode-ui="enabled: true" 
         embedded 
         style="height: 100vh; width: 100vw;"
         background="color: #001122"
-        fog="type: exponential; color: #001122; density: 0.0025">
+        fog="type: exponential; color: #001122; density: 0.0025"
+        loading-screen="enabled: false">
         
         <!-- Assets -->
         <a-assets>
@@ -220,6 +243,9 @@
             material="color: #001133; opacity: 0.7; transparent: true">
         </a-triangle>
 
+        <!-- Test cube to verify 3D rendering -->
+        <a-box position="0 1 0" color="red" width="1" height="1" depth="1"></a-box>
+        
         <!-- Lighting -->
         <a-light type="ambient" intensity="0.3" color="#002244"></a-light>
         <a-light type="directional" position="0 10 5" intensity="0.5" color="#4488cc"></a-light>
@@ -232,23 +258,32 @@
             <a-camera 
                 look-controls="pointerLockEnabled: true"
                 wasd-controls="acceleration: 15"
-                position="0 1.6 -3"
+                position="0 1.6 3"
                 cursor="fuse: false; rayOrigin: mouse">
             </a-camera>
         </a-entity>
     </a-scene>
 
     <script>
+        // Debug logging
+        console.log('Signpost Observatory: Script loading...');
+        
         // Portal interaction system with backend integration
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Signpost Observatory: DOM loaded');
+            
             const portals = document.querySelectorAll('.portal');
+            console.log('Signpost Observatory: Found', portals.length, 'portals');
             
             // Load portal data from backend
             loadPortalData();
             
             portals.forEach(portal => {
+                console.log('Signpost Observatory: Setting up portal:', portal.getAttribute('data-project'));
+                
                 portal.addEventListener('click', function() {
                     const project = this.getAttribute('data-project');
+                    console.log('Signpost Observatory: Portal clicked:', project);
                     handlePortalClick(project);
                 });
                 
@@ -261,6 +296,56 @@
                     this.setAttribute('animation__hover', 'property: scale; to: 1 1 1; dur: 300');
                 });
             });
+        });
+        
+        // A-Frame scene loaded event
+        document.addEventListener('DOMContentLoaded', function() {
+            const scene = document.querySelector('a-scene');
+            const fallbackMessage = document.getElementById('fallback-message');
+            
+            if (scene) {
+                scene.addEventListener('loaded', function() {
+                    console.log('Signpost Observatory: A-Frame scene loaded successfully');
+                    fallbackMessage.style.display = 'none';
+                    
+                    // Debug: Check if elements are visible
+                    const testCube = document.querySelector('a-box[color="red"]');
+                    const portals = document.querySelectorAll('.portal');
+                    console.log('Signpost Observatory: Test cube found:', !!testCube);
+                    console.log('Signpost Observatory: Portals found:', portals.length);
+                    
+                    // Add a visible indicator if scene loads
+                    const successIndicator = document.createElement('div');
+                    successIndicator.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: green;
+                        color: white;
+                        padding: 10px;
+                        border-radius: 5px;
+                        z-index: 1000;
+                    `;
+                    successIndicator.textContent = '✅ 3D Scene Loaded';
+                    document.body.appendChild(successIndicator);
+                });
+                
+                scene.addEventListener('error', function(error) {
+                    console.error('Signpost Observatory: A-Frame scene error:', error);
+                    fallbackMessage.style.display = 'block';
+                });
+                
+                // Timeout to show fallback if scene doesn't load
+                setTimeout(function() {
+                    if (!scene.hasLoaded) {
+                        console.warn('Signpost Observatory: A-Frame scene taking too long to load');
+                        fallbackMessage.style.display = 'block';
+                    }
+                }, 5000);
+            } else {
+                console.error('Signpost Observatory: No a-scene found!');
+                fallbackMessage.style.display = 'block';
+            }
         });
         
         async function loadPortalData() {

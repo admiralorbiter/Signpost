@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>The Signpost Observatory - Simple Test</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            background: #0a0a0a;
+        }
+        
+        .ui-overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #e0e0e0;
+            font-size: 14px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ccc;
+            text-align: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui-overlay">
+        <h3>The Signpost Observatory</h3>
+        <p>"All we can be now is the signposts for tomorrow and those that come after"</p>
+        <p>Simple Test Version</p>
+    </div>
+    
+    <div class="controls">
+        <p>WASD to move • Mouse to look • Click on glowing portals to enter projects</p>
+    </div>
+
+    <a-scene background="color: #001122">
+        <!-- Simple ground -->
+        <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#001a33"></a-plane>
+        
+        <!-- Simple portal -->
+        <a-box position="0 1 -3" color="#00ffaa" width="2" height="3" depth="0.3" class="portal" data-project="test">
+            <a-text value="Test Portal\nClick Me!" position="0 0 0.2" color="white" align="center" width="8"></a-text>
+        </a-box>
+        
+        <!-- Camera -->
+        <a-camera position="0 1.6 0" look-controls wasd-controls></a-camera>
+    </a-scene>
+
+    <script>
+        console.log('Simple Test: Script loading...');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Simple Test: DOM loaded');
+            
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                scene.addEventListener('loaded', function() {
+                    console.log('Simple Test: A-Frame scene loaded successfully');
+                });
+                
+                scene.addEventListener('error', function(error) {
+                    console.error('Simple Test: A-Frame scene error:', error);
+                });
+            }
+            
+            // Simple portal click
+            const portal = document.querySelector('.portal');
+            if (portal) {
+                portal.addEventListener('click', function() {
+                    alert('Portal clicked! A-Frame is working!');
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
